@@ -1,0 +1,80 @@
+.listed-collection-card-wrapper {
+    width: 180px;
+    margin: 10px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    .carousel-root {
+        width: 180px;
+        // margin: 0 -12px 0px;
+
+        .slide {
+            padding: 0;
+        }
+
+        .control-dots {
+            display: none;
+            bottom: 25px;
+        }
+
+        .control-arrow {
+            height: 180px;
+            display: none;
+        }
+
+        .single-nft {
+            width: 180px;
+            height: 180px;
+
+            .nft-image {
+                width: 180px;
+                min-width: 180px;
+                min-height: 180px;
+                padding: 0px;
+                left: 0;
+                position: absolute;
+                aspect-ratio: 1;
+            }
+
+            .nft-name-verify {
+                width: 180px;
+                height: 32px;
+                background-color: #ffffff80;
+                position: absolute;
+                bottom: 0px;
+                padding: 5px 10px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+
+                p {
+                    margin: 0;
+                    color: #873135;
+                    font-size: 14px;
+                    font-weight: 700;
+                    text-transform: none;
+                    direction: rtl;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    width: 100%;
+                }
+
+                .btn {
+                    margin: 0px;
+                    padding: 0px;
+                    border-radius: 11px;
+                    background-color: transparent;
+
+                    svg {
+                        color: white;
+                        width: 22px;
+                    }
+                }
+            }
+        }
+    }
+}
