@@ -667,7 +667,7 @@ class Building extends Phaser.GameObjects.Sprite {
 					]);
 					this.setInteractive(shape, Phaser.Geom.Polygon.Contains);
 				}
-				this.game.input.enableDebug(this, 0xff00ff);
+//				this.game.input.enableDebug(this, 0xff00ff);
 			}
 		}
 		else if (this.game.mode == 'construction')

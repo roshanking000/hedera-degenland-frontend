@@ -42,6 +42,7 @@ function FriendListDlg({
     onClickSortBtn,
     searchByStr
 }) {
+    const [_friendList, setFriendList] = useState(friendList);
     const [searchStr, setSearchStr] = useState('');
     const [sortType, setSortType] = useState(SORT_TYPE_NONE);
     const [friendPageIndex, setFriendPageIndex] = useState(1);
@@ -51,8 +52,8 @@ function FriendListDlg({
 
     //Get friendList from store
     useEffect(() => {
-        if (friendList?.length > 0)
-            resetFriendListToDisplay(1, friendList);
+        if (_friendList?.length > 0)
+            resetFriendListToDisplay(1, _friendList);
     }, []);
 
     const resetFriendListToDisplay = (pageIndex_, friendList_) => {
@@ -75,91 +76,9 @@ function FriendListDlg({
                 alignItems: 'center',
                 justifyContent: 'right'
             }}>
-                <div style={{
-                    width: 240,
-                    padding: '0 10px',
-                    position: 'relative'
-                }}>
-                    <TextField
-                        hiddenLabel
-                        placeholder='Write here to search.'
-                        size='small'
-                        value={searchStr}
-                        onChange={(e) => { setSearchStr(e.target.value) }}
-                        onKeyUp={(e) => {
-                            if (e.key === 'Enter') {
-                                searchByStr(e.target.value, sortType);
-                            }
-                        }}
-                        sx={{
-                            width: '100%',
-                            '& .MuiInputBase-root': {
-                                borderRadius: '30px',
-                                '&:hover': {
-                                    outline: 'none',
-                                    border: 'none'
-                                }
-                            }
-                        }}
-                    />
-                    <IconButton onClick={() => {
-                        searchByStr(searchStr, sortType);
-                    }}
-                        sx={{
-                            position: 'absolute',
-                            right: '11px',
-                            '&:focus': {
-                                outline: 'none'
-                            }
-                        }}>
-                        <SearchIcon />
-                    </IconButton>
-                </div>
-                <IconButton
-                    onClick={() => {
-                        setSortType(SORT_TYPE_ASCENDING);
-                        onClickSortBtn(searchStr, SORT_TYPE_ASCENDING);
-                    }}
-                    sx={{
-                        width: 42,
-                        height: 42,
-                        margin: '0 0 0 10px',
-                        border: '2px solid #0000008a',
-                        color: '#0000008a',
-                        backgroundColor: `${sortType === SORT_TYPE_ASCENDING ? '#e74895' : 'transparent'}`,
-                        '&:hover': {
-                            backgroundColor: `${sortType === SORT_TYPE_ASCENDING ? '#e74895' : 'transparent'}`
-                        },
-                        '&:focus': {
-                            outline: 'none'
-                        }
-                    }}>
-                    <i className="fa fa-sort-numeric-up" />
-                </IconButton>
-                <IconButton
-                    onClick={() => {
-                        setSortType(SORT_TYPE_DESCENDING);
-                        onClickSortBtn(searchStr, SORT_TYPE_DESCENDING);
-                    }}
-                    sx={{
-                        width: 42,
-                        height: 42,
-                        margin: '0 0 0 5px',
-                        border: '2px solid #0000008a',
-                        color: '#0000008a',
-                        backgroundColor: `${sortType === SORT_TYPE_DESCENDING ? '#e74895' : 'transparent'}`,
-                        '&:hover': {
-                            backgroundColor: `${sortType === SORT_TYPE_DESCENDING ? '#e74895' : 'transparent'}`
-                        },
-                        '&:focus': {
-                            outline: 'none'
-                        }
-                    }}>
-                    <i className="fa fa-sort-numeric-down" />
-                </IconButton>
             </div>
             {
-                friendList?.length > 0 &&
+                _friendList?.length > 0 &&
                 <div style={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -181,7 +100,7 @@ function FriendListDlg({
                         }}
                         page={friendPageIndex}
                         onChange={(event, value) => {
-                            resetFriendListToDisplay(value, friendList);
+                            resetFriendListToDisplay(value, _friendList);
                             setFriendPageIndex(value);
                         }}
                         count={parseInt(countOfFriend / pagenationDisplayCount) + (countOfFriend % pagenationDisplayCount !== 0 ? 1 : 0)}
@@ -418,7 +337,7 @@ function FriendListDlg({
                 })
             }
             {
-                friendList?.length > 0 &&
+                _friendList?.length > 0 &&
                 <div style={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -440,7 +359,7 @@ function FriendListDlg({
                         }}
                         page={friendPageIndex}
                         onChange={(event, value) => {
-                            resetFriendListToDisplay(value, friendList);
+                            resetFriendListToDisplay(value, _friendList);
                             setFriendPageIndex(value);
                         }}
                         count={parseInt(countOfFriend / pagenationDisplayCount) + (countOfFriend % pagenationDisplayCount !== 0 ? 1 : 0)}
@@ -540,3 +459,88 @@ export default FriendListDlg;
                             </IconButton>
                         }
  */
+
+/* 
+                <div style={{
+                    width: 240,
+                    padding: '0 10px',
+                    position: 'relative'
+                }}>
+                    <TextField
+                        hiddenLabel
+                        placeholder='Write here to search.'
+                        size='small'
+                        value={searchStr}
+                        onChange={(e) => { setSearchStr(e.target.value) }}
+                        onKeyUp={(e) => {
+                            if (e.key === 'Enter') {
+                                searchByStr(e.target.value, sortType);
+                            }
+                        }}
+                        sx={{
+                            width: '100%',
+                            '& .MuiInputBase-root': {
+                                borderRadius: '30px',
+                                '&:hover': {
+                                    outline: 'none',
+                                    border: 'none'
+                                }
+                            }
+                        }}
+                    />
+                    <IconButton onClick={() => {
+                        searchByStr(searchStr, sortType);
+                    }}
+                        sx={{
+                            position: 'absolute',
+                            right: '11px',
+                            '&:focus': {
+                                outline: 'none'
+                            }
+                        }}>
+                        <SearchIcon />
+                    </IconButton>
+                </div>
+                <IconButton
+                    onClick={() => {
+                        setSortType(SORT_TYPE_ASCENDING);
+                        onClickSortBtn(searchStr, SORT_TYPE_ASCENDING);
+                    }}
+                    sx={{
+                        width: 42,
+                        height: 42,
+                        margin: '0 0 0 10px',
+                        border: '2px solid #0000008a',
+                        color: '#0000008a',
+                        backgroundColor: `${sortType === SORT_TYPE_ASCENDING ? '#e74895' : 'transparent'}`,
+                        '&:hover': {
+                            backgroundColor: `${sortType === SORT_TYPE_ASCENDING ? '#e74895' : 'transparent'}`
+                        },
+                        '&:focus': {
+                            outline: 'none'
+                        }
+                    }}>
+                    <i className="fa fa-sort-numeric-up" />
+                </IconButton>
+                <IconButton
+                    onClick={() => {
+                        setSortType(SORT_TYPE_DESCENDING);
+                        onClickSortBtn(searchStr, SORT_TYPE_DESCENDING);
+                    }}
+                    sx={{
+                        width: 42,
+                        height: 42,
+                        margin: '0 0 0 5px',
+                        border: '2px solid #0000008a',
+                        color: '#0000008a',
+                        backgroundColor: `${sortType === SORT_TYPE_DESCENDING ? '#e74895' : 'transparent'}`,
+                        '&:hover': {
+                            backgroundColor: `${sortType === SORT_TYPE_DESCENDING ? '#e74895' : 'transparent'}`
+                        },
+                        '&:focus': {
+                            outline: 'none'
+                        }
+                    }}>
+                    <i className="fa fa-sort-numeric-down" />
+                </IconButton>
+*/

@@ -22,6 +22,8 @@ import SendFriendRequestDlg from './FriendListDlg/SendFriendRequestDlg';
 import VisitPlaceDlg from './VisitPlaceDlg';
 import MyInfoDlg from './OfferManageDlg/MyInfoDlg';
 import SetTicketDlg from './SetTicketDlg';
+import ProfileDlg from './ProfileDlg';
+import EditUsernameDlg from './EditUsernameDlg';
 
 import Dialog from '@mui/material/Dialog';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -115,6 +117,8 @@ function MainMenu(props) {
     const [sendFriendRequestViewFlag, setSendFriendRequestViewFlag] = useState(false);
     const [visitPlaceViewFlag, setVisitPlaceViewFlag] = useState(false);
     const [ticketViewFlag, setTicketViewFlag] = useState(false);
+    const [profileViewFlag, setProfileViewFlag] = useState(false);
+    const [editUsernameViewFlag, setEditUsernameViewFlag] = useState(false);
 
     // staked Nft Info
     const [stakedNftsFlag, setStakedNftsFlag] = useState(false);
@@ -829,6 +833,9 @@ function MainMenu(props) {
                         setMainMenuDlgViewFlag(false);
                         props.props.setGoOut(true);
                     }}
+                    onClickProfileBtn={() => {
+                        setProfileViewFlag(true);
+                    }}
                     onClickMainMapBtn={async () => {
                         setMainMenuDlgViewFlag(false);
                         window.location.reload(false);
@@ -1295,6 +1302,38 @@ function MainMenu(props) {
                     }}
                     onClickCancelBtn={() => {
                         setTicketViewFlag(false);
+                    }}
+                />
+            </Dialog>
+
+            <Dialog
+                open={profileViewFlag}
+                fullWidth={true}
+                scroll='body'
+                maxWidth='sm'
+            >
+                <ProfileDlg
+                    onClickEditBtn={() => {
+                        setEditUsernameViewFlag(true);
+                    }}
+                    onClickCancelBtn={() => {
+                        setProfileViewFlag(false);
+                    }}
+                />
+            </Dialog>
+
+            <Dialog
+                open={editUsernameViewFlag}
+                scroll='body'
+                maxWidth='sm'
+            >
+                <EditUsernameDlg
+                    props={props.props}
+                    onClickOKBtn={() => {
+                        setEditUsernameViewFlag(false);
+                    }}
+                    onClickCancelBtn={() => {
+                        setEditUsernameViewFlag(false);
                     }}
                 />
             </Dialog>

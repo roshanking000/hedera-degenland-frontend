@@ -34,7 +34,7 @@ function MainMenuDlg({
     onClickOffersBtn,
     onClickMessagesBtn,
     onClickGoOutBtn,
-    onClickSettingsBtn,
+    onClickProfileBtn,
     onClickMainMapBtn,
     onClickVisitPlaceBtn,
     onClickSetTicketBtn,
@@ -91,9 +91,9 @@ function MainMenuDlg({
                     sx={MAIN_BUTTON_STYLE}>
                     Messages
                 </Button>
-                <Button onClick={() => { onClickSettingsBtn() }}
+                <Button onClick={() => { onClickProfileBtn() }}
                     sx={MAIN_BUTTON_STYLE}>
-                    Settings
+                    Profile
                 </Button>
                 <Button onClick={() => { onClickMainMapBtn() }}
                     sx={MAIN_BUTTON_STYLE}>
