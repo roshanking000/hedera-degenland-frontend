@@ -1135,6 +1135,10 @@ class Building extends Phaser.GameObjects.Sprite {
 				this.x = this.game.input.mousePointer.worldX + 40;
 				this.y = this.game.input.mousePointer.worldY + 40;
 			}
+			else if (this.game.buildingInfo[this.buildingType + this.game.roadcount + this.game.groundcount - 1].size == '4*5') {
+				this.x = this.game.input.mousePointer.worldX + 40;
+				this.y = this.game.input.mousePointer.worldY + 40;
+			}
 			else if (this.game.buildingInfo[this.buildingType + this.game.roadcount + this.game.groundcount - 1].size == '1*2') {
 				this.x = this.game.input.mousePointer.worldX + 73 / 2;
 				this.y = this.game.input.mousePointer.worldY + 40;
@@ -1278,6 +1282,10 @@ class Building extends Phaser.GameObjects.Sprite {
 			this.y = y + this.game.tileHeight / 2;
 		}
 		else if (this.game.buildingInfo[this.buildingType].size == '7*8') {
+			this.x = x + 35;
+			this.y = y + this.game.tileHeight / 2;
+		}
+		else if (this.game.buildingInfo[this.buildingType].size == '4*5') {
 			this.x = x + 35;
 			this.y = y + this.game.tileHeight / 2;
 		}

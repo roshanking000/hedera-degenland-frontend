@@ -1128,6 +1128,8 @@ class SinglePlace extends Phaser.Scene {
       bud = this.add.sprite(this[tileID].x + 64, this[tileID].y + this.tileHeight / 2, buildingType + '-' + serial_number);
     else if (this.buildingInfo[type - 1].size == '7*8')
       bud = this.add.sprite(this[tileID].x + 35, this[tileID].y + this.tileHeight / 2, buildingType + '-' + serial_number);
+    else if (this.buildingInfo[type - 1].size == '4*5')
+      bud = this.add.sprite(this[tileID].x + 35, this[tileID].y + this.tileHeight / 2, buildingType + '-' + serial_number);
     else if (this.buildingInfo[type - 1].size == '1*2')
       bud = this.add.sprite(this[tileID].x + 73 / 2, this[tileID].y + this.tileHeight / 2, buildingType + '-' + serial_number);
     else if (this.buildingInfo[type - 1].size == '2*1')
