@@ -141,7 +141,7 @@ class GameView extends Phaser.Scene {
     this.load.image('ground-0', process.env.PUBLIC_URL + "imgs/ground/g(0).png");
     this.load.image('ground-1', process.env.PUBLIC_URL + "imgs/ground/g(1).png");
     this.load.image('advertisement-background', process.env.PUBLIC_URL + "imgs/building/billizard-default.png");
-    for (var i = 1; i <= 19; i++)
+    for (var i = 1; i <= 21; i++)
       this.load.image('building-' + i, process.env.PUBLIC_URL + "imgs/building/b (" + i + ").png");
     for (var i = 1; i <= 22; i++)
       this.load.image('road-' + i, process.env.PUBLIC_URL + "imgs/road/r (" + i + ").png");
