@@ -271,6 +271,10 @@ function Login() {
         history.push('/main');
     }
 
+    const handleMarketplaceLogin = () => {
+        history.push('/marketplace');
+    }
+
     //--------------------------------------------------------------------------------------------------
 
     const _getPlayerInfo = async () => {
@@ -419,8 +423,9 @@ function Login() {
                                         <NftCardSmall singleNftInfo={{ imgUrl: "imgs/front/nfts/mogul.png", name: "Mogul", nftCount: walletNftInfo.mogulCount }} />
                                         <NftCardSmall singleNftInfo={{ imgUrl: "imgs/front/nfts/investor.png", name: "Investor", nftCount: walletNftInfo.investorCount }} />
                                     </div>
-                                    <div className="width-100 display-flex flex-row item-center mt-3">
-                                        <Button className="button-style1" style={{ width: "160px" }} onClick={handleLogin} >Log In</Button>
+                                    <div className="width-100 display-flex flex-row item-center mt-1" style={{ alignItems: 'center', justifyContent: 'space-around' }}>
+                                        <Button className="button-style1" style={{ width: "160px" }} onClick={handleLogin} >Log in to Degenland</Button>
+                                        <Button className="button-style1" style={{ width: "160px" }} onClick={handleMarketplaceLogin} >Log in to Marketplace</Button>
                                     </div>
                                 </div>
                             }

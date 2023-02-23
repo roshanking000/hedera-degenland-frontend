@@ -94,6 +94,7 @@ class Map extends Phaser.Scene {
 
   async create() {
     this.input.mouse.disableContextMenu();
+    console.log(this.sound, this.sfx);
     this.setDefaultMusic();
     this.socket.emit("getBuildingInfo");
 

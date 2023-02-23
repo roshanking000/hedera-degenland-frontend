@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from "react-router-dom";
 
@@ -6,15 +6,15 @@ import Badge from '@mui/material/Badge';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import LinearProgress from '@mui/material/LinearProgress';
-import HandshakeIcon from '@mui/icons-material/Handshake';
-import PersonIcon from '@mui/icons-material/Person';
-//Icon
-import ApartmentIcon from '@mui/icons-material/Apartment';
-import PeopleIcon from '@mui/icons-material/People';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { useHashConnect } from "../../../assets/api/HashConnectAPIProvider.tsx";
+import { postRequest } from "../../../assets/api/apiRequests";
 import * as env from "../../../env";
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const TITLE_COLOR = '#8b1832';
 
@@ -23,15 +23,39 @@ function ProfileDlg({
     onClickCancelBtn
 }) {
     const history = useHistory();
+    const [loadingView, setLoadingView] = useState(false);
     const myProfile = useSelector(state => state.playerinfo.data);
     const { disconnect } = useHashConnect();
 
-    const onClickDisconnectWalletBtn = () => {
+    const onClickDisconnectWalletBtn = async () => {
+        const _postResult = await postRequest(env.SERVER_URL + "/api/account/logout", { accountId: myProfile.accountId });
+        if (!_postResult) {
+            toast.error("Something wrong with server!");
+            setLoadingView(false);
+            return;
+        }
+        if (!_postResult.result) {
+            toast.error(_postResult.error);
+            setLoadingView(false);
+            return;
+        }
         disconnect();
         history.push('/login');
     }
 
-    const onClickLogoutBtn = () => {
+    const onClickLogoutBtn = async () => {
+        setLoadingView(true);
+        const _postResult = await postRequest(env.SERVER_URL + "/api/account/logout", { accountId: myProfile.accountId });
+        if (!_postResult) {
+            toast.error("Something wrong with server!");
+            setLoadingView(false);
+            return;
+        }
+        if (!_postResult.result) {
+            toast.error(_postResult.error);
+            setLoadingView(false);
+            return;
+        }
         history.push('/login');
     }
 
@@ -325,38 +349,6 @@ function ProfileDlg({
                 width: '100%',
                 padding: '0 20px'
             }}>
-                <Button onClick={onClickCancelBtn}
-                    variant='outlined'
-                    sx={{
-                        height: '42px',
-                        borderRadius: '21px',
-                        textTransform: 'none',
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: '#e74895',
-                        padding: '0 25px',
-                        border: '3px solid #e74895',
-                        '&:hover': {
-                            backgroundColor: 'grey',
-                            border: '3px solid grey',
-                            color: 'white',
-                            boxShadow: 'none',
-                        },
-                        '&:focus': {
-                            outline: 'none',
-                            boxShadow: 'none',
-                        }
-                    }}>
-                    Cancel
-                </Button>
-            </div>
-        </div >
-    );
-}
-
-export default ProfileDlg;
-
-/*
                 <Button onClick={onClickDisconnectWalletBtn}
                     sx={{
                         height: '42px',
@@ -401,4 +393,39 @@ export default ProfileDlg;
                     }}>
                     Logout
                 </Button>
-*/
+                <Button onClick={onClickCancelBtn}
+                    variant='outlined'
+                    sx={{
+                        height: '42px',
+                        borderRadius: '21px',
+                        textTransform: 'none',
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: '#e74895',
+                        padding: '0 25px',
+                        border: '3px solid #e74895',
+                        '&:hover': {
+                            backgroundColor: 'grey',
+                            border: '3px solid grey',
+                            color: 'white',
+                            boxShadow: 'none',
+                        },
+                        '&:focus': {
+                            outline: 'none',
+                            boxShadow: 'none',
+                        }
+                    }}>
+                    Cancel
+                </Button>
+            </div>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={loadingView}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
+        </div >
+    );
+}
+
+export default ProfileDlg;

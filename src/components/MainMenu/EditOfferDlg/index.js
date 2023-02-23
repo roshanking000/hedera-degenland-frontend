@@ -533,7 +533,6 @@ function EditOfferDlg({
 
     let _hbarAmount = myHbar + associateFee;
     let _fallbackFee = 0;
-    console.log(_tickedNfts);
     for (let i = 0; i < _tickedNfts.length; i++)
       _fallbackFee += parseInt(_tickedNfts[i].fallback, 10);
     _hbarAmount += _fallbackFee;

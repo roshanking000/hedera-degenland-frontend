@@ -8,9 +8,7 @@ import {
   TransferTransaction,
   AccountAllowanceApproveTransaction,
   TokenAssociateTransaction,
-  Timestamp,
-  ScheduleCreateTransaction,
-  TransactionId
+  AccountAllowanceDeleteTransaction,
 } from '@hashgraph/sdk';
 import * as env from "../../env.js";
 
@@ -232,6 +230,81 @@ export default function HashConnectProvider({
     initializeAll();
   };
 
+  const allowanceNft = async (tokenId_, serialNum_) => {
+    const _accountId = saveData.accountIds[0];
+    const _provider = hashConnect.getProvider(netWork, saveData.topic, _accountId);
+    const _signer = hashConnect.getSigner(_provider);
+    const _treasuryId = AccountId.fromString(env.TREASURY_ID);
+    const _nft = new NftId(TokenId.fromString(tokenId_), parseInt(serialNum_));
+
+    const allowanceTx = new AccountAllowanceApproveTransaction().approveTokenNftAllowance(_nft, _accountId, _treasuryId);
+    if (!allowanceTx) return false;
+    const allowanceFreeze = await allowanceTx.freezeWithSigner(_signer);
+    if (!allowanceFreeze) return false;
+    const allowanceSign = await allowanceFreeze.signWithSigner(_signer);
+    if (!allowanceSign) return false;
+    const allowanceSubmit = await allowanceSign.executeWithSigner(_signer);
+    if (!allowanceSubmit) return false;
+    const allowanceRx = await _provider.getTransactionReceipt(allowanceSubmit.transactionId);
+
+    if (allowanceRx.status._code === 22)
+      return true;
+
+    return false;
+  }
+
+  const deleteAllowanceNft = async (tokenId_, serialNum_) => {
+    const _accountId = saveData.accountIds[0];
+    const _provider = hashConnect.getProvider(netWork, saveData.topic, _accountId);
+    const _signer = hashConnect.getSigner(_provider);
+    const _nftId = new NftId(TokenId.fromString(tokenId_), parseInt(serialNum_));
+
+    const allowanceTx = new AccountAllowanceDeleteTransaction().deleteAllTokenNftAllowances(_nftId, _accountId);
+    if (!allowanceTx) return false;
+    const allowanceFreeze = await allowanceTx.freezeWithSigner(_signer);
+    if (!allowanceFreeze) return false;
+    const allowanceSign = await allowanceTx.signWithSigner(_signer);
+    if (!allowanceSign) return false;
+    const allowanceSubmit = await allowanceSign.executeWithSigner(_signer);
+    if (!allowanceSubmit) return false;
+    const allowanceRx = await _provider.getTransactionReceipt(allowanceSubmit.transactionId);
+
+    if (allowanceRx.status._code === 22)
+      return true;
+
+    return false;
+  }
+
+  const buyNFT = async (nftInfo_, hbarAmount_) => {
+    const _accountId = saveData.accountIds[0];
+    const _provider = hashConnect.getProvider(netWork, saveData.topic, _accountId);
+    const _signer = hashConnect.getSigner(_provider);
+    const _treasuryId = AccountId.fromString(env.TREASURY_ID);
+
+    const allowanceTx = new TransferTransaction();
+    if (hbarAmount_ != 0) {
+      const sendBal = new Hbar(hbarAmount_);
+
+      allowanceTx.addApprovedHbarTransfer(_accountId, sendBal.negated())
+      allowanceTx.addHbarTransfer(_treasuryId, sendBal)
+    }
+
+    const _nft = new NftId(TokenId.fromString(nftInfo_.token_id), parseInt(nftInfo_.serial_number));
+    allowanceTx.addApprovedNftTransfer(_nft, _treasuryId, _accountId);
+
+    const allowanceFreeze = await allowanceTx.freezeWithSigner(_signer);
+    if (!allowanceFreeze) return false;
+    const allowanceSign = await allowanceFreeze.signWithSigner(_signer);
+    if (!allowanceSign) return false;
+    const allowanceSubmit = await allowanceSign.executeWithSigner(_signer);
+    if (!allowanceSubmit) return false;
+    const allowanceRx = await _provider.getTransactionReceipt(allowanceSubmit.transactionId);
+
+    if (allowanceRx.status._code === 22)
+      return true;
+
+    return false;
+  }
 
   const sendHbarAndNftToTreasury = async (amount_, tokenId_, serialNum_) => {
     // console.log("************************ sendHbarAndNftToTreasury 0 : ");
@@ -504,7 +577,7 @@ export default function HashConnectProvider({
 
   return (
     <HashConnectAPIContext.Provider
-      value={{ walletData: saveData, installedExtensions, connect, disconnect, sendHbarAndNftToTreasury, sendHbarToTreasury, sendPALToTreasury, autoAssociate, receiveNft, sendHbarAndMultiNftsToTreasury, receiveMultipleNfts, receiveReward }}>
+      value={{ walletData: saveData, installedExtensions, connect, disconnect, sendHbarAndNftToTreasury, sendHbarToTreasury, sendPALToTreasury, autoAssociate, receiveNft, sendHbarAndMultiNftsToTreasury, receiveMultipleNfts, receiveReward, allowanceNft, deleteAllowanceNft, buyNFT }}>
       {children}
     </HashConnectAPIContext.Provider>
   );

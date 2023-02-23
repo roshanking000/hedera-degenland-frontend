@@ -150,8 +150,8 @@ function FriendListDlg({
                                     width: '16px',
                                     height: '16px',
                                     borderRadius: '8px',
-                                    backgroundColor: `${item.connectState ? `${ACTIVE_BADGE_COLOR}` : 'grey'}`,
-                                    color: `${item.connectState ? `${ACTIVE_BADGE_COLOR}` : 'grey'}`,
+                                    backgroundColor: `${item.loginState ? `${ACTIVE_BADGE_COLOR}` : 'grey'}`,
+                                    color: `${item.loginState ? `${ACTIVE_BADGE_COLOR}` : 'grey'}`,
                                     '&::after': {
                                         position: 'absolute',
                                         top: 0,
@@ -159,7 +159,7 @@ function FriendListDlg({
                                         width: '100%',
                                         height: '100%',
                                         borderRadius: '50%',
-                                        animation: `${item.connectState ? 'ripple 1.2s infinite ease-in-out' : 'none'}`,
+                                        animation: `${item.loginState ? 'ripple 1.2s infinite ease-in-out' : 'none'}`,
                                         border: '1px solid currentColor',
                                         content: '""',
                                     },
@@ -435,7 +435,7 @@ export default FriendListDlg;
 
 /**
  *                         {
-                            item.connectState &&
+                            item.loginState &&
                             <IconButton
                                 onClick={(e) => {
                                     e.stopPropagation();
