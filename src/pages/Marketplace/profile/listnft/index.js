@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 
 import { styled, useTheme } from '@mui/material/styles';
 
@@ -21,67 +21,31 @@ import {
 import {
     PersonOutline,
     Add,
-    EventNoteOutlined,
-    FavoriteBorderOutlined,
-    RemoveRedEyeOutlined,
-    SellOutlined
+    EventNoteOutlined
 } from '@mui/icons-material';
 
-import { useHashConnect } from "../../../assets/api/HashConnectAPIProvider.tsx";
-import { getRequest, postRequest } from "../../../assets/api/apiRequests";
-import * as env from "../../../env";
+import { useHashConnect } from "../../../../assets/api/HashConnectAPIProvider.tsx";
+import { getRequest, postRequest } from "../../../../assets/api/apiRequests";
+import * as env from "../../../../env";
 
-import NavBar from '../../../components/NavBar';
+import NavBar from '../../../../components/NavBar';
 
-export default function ItemDetail() {
-    const { id } = useParams();
+export default function ListNFT() {
+    const { token_id, serial_number } = useParams();
+    let history = useHistory();
 
-    const { walletData, buyNFT, deleteAllowanceNft } = useHashConnect();
+    const { walletData, allowanceNft } = useHashConnect();
     const { accountIds } = walletData;
 
     const [loadingView, setLoadingView] = useState(false);
-    const [itemDetailInfo, setItemDetailInfo] = useState(null);
     const [nftInfo, setNftInfo] = useState(null);
     const [nftPrice, setNftPrice] = useState(100000);
     const [nftDetailInfo, setNftDetailInfo] = useState(null);
-    const [isFavourites, setIsFavourites] = useState(false);
-    const [isWatching, setIsWatching] = useState(false);
-    const [favourites, setFavourites] = useState(0);
-    const [watching, setWatching] = useState(0);
-
-    useEffect(() => {
-        const getNftInfo = async (_id) => {
-            setLoadingView(true);
-            const _res = await getRequest(env.SERVER_URL + "/api/marketplace/get_item_detail?id=" + _id);
-            if (!_res) {
-                toast.error("Something wrong with server!");
-                setLoadingView(false);
-                return;
-            }
-            if (!_res.result) {
-                toast.error(_res.error);
-                setLoadingView(false);
-                return;
-            }
-            for (let i = 0; i < _res.data.favouritesList.length; i++) {
-                if (_res.data.favouritesList[i] == accountIds[0])
-                    setIsFavourites(true);
-            }
-            for (let i = 0; i < _res.data.watchingList.length; i++) {
-                if (_res.data.watchingList[i] == accountIds[0])
-                    setIsWatching(true);
-            }
-            setItemDetailInfo(_res.data);
-            setFavourites(_res.data.favourites);
-            setWatching(_res.data.watching);
-        }
-
-        if (accountIds?.length > 0)
-            getNftInfo(id);
-    }, [accountIds]);
+    const [listState, setListState] = useState(null);
 
     useEffect(() => {
         const getNftInfoFromMirrorNet = async (tokenId_, serialNum_) => {
+            setLoadingView(true);
             const g_singleNftInfo = await getRequest(`${env.MIRROR_NET_URL}/api/v1/tokens/${tokenId_}/nfts?serialNumber=${serialNum_}`);
             if (g_singleNftInfo && g_singleNftInfo.nfts.length > 0) {
                 let g_preMdUrl = base64ToUtf8(g_singleNftInfo.nfts[0].metadata).split("//");
@@ -104,6 +68,7 @@ export default function ItemDetail() {
                     };
                     setNftInfo(_metaData);
                     setLoadingView(false);
+                    console.log("getNftInfoFromMirrorNet");
                     return;
                 }
                 toast.error("Something wrong with server!");
@@ -111,7 +76,6 @@ export default function ItemDetail() {
                 return;
             }
             toast.error("Something wrong with server!");
-            setLoadingView(false);
             return;
         }
 
@@ -140,14 +104,31 @@ export default function ItemDetail() {
             _nftDetailList.push({ name: 'Transaction Fee', value: '2%' });
             _nftDetailList.push({ name: 'Listing/delisting network fee', value: '$0.05' });
             setNftDetailInfo(_nftDetailList);
+            console.log("getDetailInfo");
             return;
         }
 
-        if (itemDetailInfo) {
-            getNftInfoFromMirrorNet(itemDetailInfo.token_id, itemDetailInfo.serial_number);
-            getDetailInfo(itemDetailInfo.token_id, itemDetailInfo.serial_number);
+        getNftInfoFromMirrorNet(token_id, serial_number);
+        getDetailInfo(token_id, serial_number);
+        checkList(token_id, serial_number);
+    }, []);
+
+    const checkList = async (tokenId_, serialNum_) => {
+        const _res = await getRequest(env.SERVER_URL + "/api/marketplace/check_nft?token_id=" + tokenId_ + "&serial_number=" + serialNum_);
+        if (!_res) {
+            toast.error("Something wrong with server!");
+            setLoadingView(false);
+            return;
         }
-    }, [itemDetailInfo]);
+        if (!_res.result) {
+            toast.error(_res.error);
+            setLoadingView(false);
+            return;
+        }
+        setLoadingView(false);
+        setListState(_res.data);
+        return;
+    }
 
     // convert metadata base64 string to utf8
     const base64ToUtf8 = (base64Str_) => {
@@ -235,347 +216,137 @@ export default function ItemDetail() {
                                 </p>
                                 {/* 2 part */}
                                 <div style={{
-                                    display: 'flex',
-                                    color: 'black',
-                                    rowGap: '0.5rem',
-                                    alignItems: 'center',
-                                    flexWrap: 'wrap',
-                                    marginTop: '0.5rem',
-                                    marginBottom: '1rem',
-                                }}>
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        marginRight: '1.5rem',
-                                    }}>
-                                        <p style={{
-                                            marginRight: '0.25rem',
-                                            margin: 0,
-                                            fontWeight: '500',
-                                        }}>
-                                            Owned by {itemDetailInfo.owner_playerid}
-                                        </p>
-                                    </div>
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        marginRight: '1.5rem',
-                                    }}>
-                                        {
-                                            isFavourites == false &&
-                                            <FavoriteBorderOutlined fontSize='large'
-                                                sx={{
-                                                    display: 'block',
-                                                    verticalAlign: 'middle',
-                                                    marginRight: '0.5rem',
-                                                    height: '1.5rem',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={async () => {
-                                                    if (isFavourites == false) {
-                                                        setLoadingView(true);
-                                                        const _postData = {
-                                                            id: id,
-                                                            accountId: accountIds[0]
-                                                        };
-                                                        const _res = await postRequest(env.SERVER_URL + "/api/marketplace/set_favourites", _postData);
-                                                        if (!_res) {
-                                                            toast.error("Something wrong with server!");
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        if (!_res.result) {
-                                                            toast.error(_res.error);
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        setIsFavourites(true);
-                                                        setFavourites(_res.data.favourites);
-                                                        setLoadingView(false);
-                                                    }
-                                                }}
-                                            />
-                                        }
-                                        {
-                                            isFavourites == true &&
-                                            <FavoriteBorderOutlined fontSize='large'
-                                                sx={{
-                                                    display: 'block',
-                                                    verticalAlign: 'middle',
-                                                    marginRight: '0.5rem',
-                                                    height: '1.5rem',
-                                                    color: 'red',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={async () => {
-                                                    if (isFavourites == true) {
-                                                        setLoadingView(true);
-                                                        const _postData = {
-                                                            id: id,
-                                                            accountId: accountIds[0]
-                                                        };
-                                                        const _res = await postRequest(env.SERVER_URL + "/api/marketplace/unset_favourites", _postData);
-                                                        if (!_res) {
-                                                            toast.error("Something wrong with server!");
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        if (!_res.result) {
-                                                            toast.error(_res.error);
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        setIsFavourites(false);
-                                                        setFavourites(_res.data.favourites);
-                                                        setLoadingView(false);
-                                                    }
-                                                }}
-                                            />
-                                        }
-                                        <p style={{
-                                            margin: '0',
-                                            fontWeight: '500',
-                                        }}>
-                                            {favourites} favourites
-                                        </p>
-                                    </div>
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                    }}>
-                                        {
-                                            isWatching == false &&
-                                            <RemoveRedEyeOutlined fontSize='large'
-                                                sx={{
-                                                    display: 'block',
-                                                    verticalAlign: 'middle',
-                                                    marginRight: '0.5rem',
-                                                    height: '1.5rem',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={async () => {
-                                                    if (isWatching == false) {
-                                                        setLoadingView(true);
-                                                        const _postData = {
-                                                            id: id,
-                                                            accountId: accountIds[0]
-                                                        };
-                                                        const _res = await postRequest(env.SERVER_URL + "/api/marketplace/set_watching", _postData);
-                                                        if (!_res) {
-                                                            toast.error("Something wrong with server!");
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        if (!_res.result) {
-                                                            toast.error(_res.error);
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        setIsWatching(true);
-                                                        setWatching(_res.data.watching);
-                                                        setLoadingView(false);
-                                                    }
-                                                }}
-                                            />
-                                        }
-                                        {
-                                            isWatching == true &&
-                                            <RemoveRedEyeOutlined fontSize='large'
-                                                sx={{
-                                                    display: 'block',
-                                                    verticalAlign: 'middle',
-                                                    marginRight: '0.5rem',
-                                                    height: '1.5rem',
-                                                    color: 'red',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={async () => {
-                                                    if (isWatching == true) {
-                                                        setLoadingView(true);
-                                                        const _postData = {
-                                                            id: id,
-                                                            accountId: accountIds[0]
-                                                        };
-                                                        const _res = await postRequest(env.SERVER_URL + "/api/marketplace/unset_watching", _postData);
-                                                        if (!_res) {
-                                                            toast.error("Something wrong with server!");
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        if (!_res.result) {
-                                                            toast.error(_res.error);
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        setIsWatching(false);
-                                                        setWatching(_res.data.watching);
-                                                        setLoadingView(false);
-                                                    }
-                                                }}
-                                            />
-                                        }
-                                        <p style={{
-                                            margin: '0',
-                                            fontWeight: '500',
-                                        }}>
-                                            {watching} watching
-                                        </p>
-                                    </div>
-                                </div>
-                                {/* 3 part */}
-                                <div style={{
                                     padding: '0.75rem',
-                                    borderRadius: '0.75rem',
-                                    backgroundColor: 'darkseagreen',
-                                }}>
-                                    Current Price
-                                    <div style={{
-                                        display: 'flex',
-                                    }}>
-                                        <SellOutlined sx={{
-                                            display: 'block',
-                                            verticalAlign: 'middle',
-                                            width: '1.75rem',
-                                            height: '1.75rem',
-                                            color: 'blue',
-                                        }} />
-                                        <p style={{
-                                            margin: 0,
-                                            fontSize: '1.25rem',
-                                            fontWeight: '600',
-                                            lineHeight: '1.75rem',
-                                            paddingLeft: '0.5rem',
-                                        }}>
-                                            {itemDetailInfo.price} ℏ
-                                        </p>
-                                    </div>
-                                    {
-                                        accountIds[0] == itemDetailInfo.owner_accountid &&
-                                        <div style={{
-                                            display: 'flex',
-                                            paddingBottom: '0.75rem',
-                                            marginTop: '0.75rem',
-                                        }}>
-                                            <Button onClick={async () => {
-                                                setLoadingView(true);
-                                                const _res = await deleteAllowanceNft(itemDetailInfo.token_id, itemDetailInfo.serial_number);
-                                                if (!_res) {
-                                                    toast.error("Error! The transaction was rejected, or failed!");
-                                                    setLoadingView(false);
-                                                    return;
-                                                }
-                                                setLoadingView(false);
-                                            }}
-                                                variant='outlined'
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'cetner',
-                                                    justifyContent: 'center',
-                                                    flex: '1 1 0%',
-                                                    maxWidth: '20rem',
-                                                    padding: '2rem, 0.5rem',
-                                                    marginRight: '1rem',
-                                                    borderRadius: '21px',
-                                                    textTransform: 'none',
-                                                    fontSize: 16,
-                                                    fontWeight: 700,
-                                                    color: 'white',
-                                                    backgroundColor: 'blueviolet',
-                                                    '&:focus': {
-                                                        outline: 'none',
-                                                        boxShadow: 'none',
-                                                    }
-                                                }}>
-                                                Cancel Listing
-                                            </Button>
-                                        </div>
-                                    }
-                                    {
-                                        accountIds[0] != itemDetailInfo.owner_accountid &&
-                                        <div style={{
-                                            display: 'flex',
-                                            paddingBottom: '0.75rem',
-                                            marginTop: '0.75rem',
-                                        }}>
-                                            <Button onClick={async () => {
-
-                                            }}
-                                                variant='outlined'
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'cetner',
-                                                    justifyContent: 'center',
-                                                    flex: '1 1 0%',
-                                                    maxWidth: '20rem',
-                                                    padding: '2rem, 0.5rem',
-                                                    marginRight: '1rem',
-                                                    borderRadius: '21px',
-                                                    textTransform: 'none',
-                                                    fontSize: 16,
-                                                    fontWeight: 700,
-                                                    color: 'blueviolet',
-                                                    border: '1px solid #e74895',
-                                                    '&:hover': {
-                                                        backgroundColor: 'blueviolet',
-                                                        border: '2px solid blueviolet',
-                                                        color: 'white',
-                                                        boxShadow: 'none',
-                                                    },
-                                                    '&:focus': {
-                                                        outline: 'none',
-                                                        boxShadow: 'none',
-                                                    }
-                                                }}>
-                                                Associate Token
-                                            </Button>
-                                            <Button onClick={async () => {
-                                                setLoadingView(true);
-                                                const _nftInfo = {
-                                                    token_id: itemDetailInfo.token_id,
-                                                    serial_number: itemDetailInfo.serial_number
-                                                };
-                                                const _res = await buyNFT(_nftInfo, itemDetailInfo.price);
-                                                if (!_res) {
-                                                    toast.error("Error! The transaction was rejected, or failed!");
-                                                    setLoadingView(false);
-                                                    return;
-                                                }
-                                                setLoadingView(false);
-                                            }}
-                                                variant='outlined'
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'cetner',
-                                                    justifyContent: 'center',
-                                                    flex: '1 1 0%',
-                                                    maxWidth: '20rem',
-                                                    padding: '2rem, 0.5rem',
-                                                    marginRight: '1rem',
-                                                    borderRadius: '21px',
-                                                    textTransform: 'none',
-                                                    fontSize: 16,
-                                                    fontWeight: 700,
-                                                    color: 'white',
-                                                    backgroundColor: 'blueviolet',
-                                                    '&:focus': {
-                                                        outline: 'none',
-                                                        boxShadow: 'none',
-                                                    }
-                                                }}>
-                                                Buy this NFT
-                                            </Button>
-                                        </div>
-                                    }
-                                </div>
-                                {/* 4 part */}
-                                <div style={{
-                                    padding: '0.75rem',
-                                    marginTop: '0.5rem',
                                     borderRadius: '0.75rem',
                                     backgroundColor: 'darkseagreen',
                                     fontWeight: '600',
                                 }}>
                                     First make sure the HashPack Chrome extension is open and unlocked. To list your NFT input the amount of HBAR you would like to sell it for (mininum 2 HBAR). Click "List this NFT". A transaction will be sent to your HashPack wallet, which needs to be approved.
+                                    <div style={{
+                                        display: 'flex',
+                                        paddingBottom: '0.75rem',
+                                        marginTop: '0.75rem'
+                                    }}>
+                                        {
+                                            listState && listState.status == false &&
+                                            <div style={{
+                                                display: 'flex',
+                                                marginTop: '2.5rem'
+                                            }}>
+                                                <div style={{
+                                                    position: 'relative',
+                                                    borderRadius: '0.375rem',
+                                                    marginRight: '0.5rem',
+                                                }}>
+                                                    <TextField
+                                                        label="price"
+                                                        type="text"
+                                                        size="small"
+                                                        value={nftPrice}
+                                                        onChange={(e) => {
+                                                            const regex = /^[0-9\b]+$/;
+                                                            if (e.target.value == "" || regex.test(e.target.value))
+                                                                setNftPrice(e.target.value)
+                                                        }}
+                                                    />
+                                                </div>
+                                                <Button onClick={async () => {
+                                                    setLoadingView(true);
+                                                    // Allowance nft
+                                                    const _approveResult = await allowanceNft(token_id, serial_number);
+                                                    if (!_approveResult) {
+                                                        toast.error("Error! The transaction was rejected, or failed!");
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+
+                                                    const _postData = {
+                                                        owner_accountid: accountIds[0],
+                                                        token_id: token_id,
+                                                        serial_number: serial_number,
+                                                        price: nftPrice,
+                                                        name: nftInfo.name,
+                                                        creator: nftInfo.creator,
+                                                        imageUrl: nftInfo.imageUrl
+                                                    };
+
+                                                    const _nftListRes = await postRequest(env.SERVER_URL + "/api/marketplace/set_list", _postData);
+                                                    if (!_nftListRes) {
+                                                        toast.error("Something wrong with server!");
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+                                                    if (!_nftListRes.result) {
+                                                        toast.error(_nftListRes.error);
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+                                                    checkList(token_id, serial_number);
+                                                    // success
+                                                    toast.success(_nftListRes.msg);
+                                                    setLoadingView(false);
+                                                }}
+                                                    variant='outlined'
+                                                    sx={{
+                                                        padding: '1rem, 0.25rem',
+                                                        marginRight: '1rem',
+                                                        borderRadius: '21px',
+                                                        textTransform: 'none',
+                                                        fontSize: 16,
+                                                        fontWeight: 700,
+                                                        color: 'blueviolet',
+                                                        border: '1px solid #e74895',
+                                                        '&:hover': {
+                                                            backgroundColor: 'blueviolet',
+                                                            border: '2px solid blueviolet',
+                                                            color: 'white',
+                                                            boxShadow: 'none',
+                                                        },
+                                                        '&:focus': {
+                                                            outline: 'none',
+                                                            boxShadow: 'none',
+                                                        }
+                                                    }}>
+                                                    List this NFT
+                                                </Button>
+                                            </div>
+                                        }
+                                        {
+                                            listState && listState.status == true && listState.id &&
+                                            <div style={{
+                                                display: 'flex',
+                                                marginTop: '2.5rem'
+                                            }}>
+                                                <Button
+                                                    sx={{
+                                                        display: 'flex',
+                                                        height: '42px',
+                                                        borderRadius: '21px',
+                                                        textTransform: 'none',
+                                                        fontSize: 16,
+                                                        fontWeight: 700,
+                                                        color: 'white',
+                                                        padding: '0 25px',
+                                                        backgroundColor: '#e74895',
+                                                        marginRight: '20px',
+                                                        '&:hover': {
+                                                            backgroundColor: 'grey',
+                                                            boxShadow: 'none',
+                                                        },
+                                                        '&:focus': {
+                                                            outline: 'none',
+                                                            boxShadow: 'none',
+                                                        }
+                                                    }}
+                                                    onClick={() => {
+                                                        history.push(`/item-details/${listState.id}`);
+                                                    }}
+                                                >
+                                                    View NFT listing
+                                                </Button>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                                 {/* 3 part */}
                                 <Box sx={{

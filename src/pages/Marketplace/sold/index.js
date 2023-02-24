@@ -32,7 +32,7 @@ import NFTCard from "../../../components/NFTCard";
 
 const pagenationDisplayCount = 24;
 
-export default function Profile() {
+export default function Sold() {
     const { walletData } = useHashConnect();
     const { accountIds } = walletData;
 

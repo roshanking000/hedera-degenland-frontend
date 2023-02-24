@@ -71,15 +71,6 @@ export default function Marketplace() {
         setCurrentPageNftList(nftList_.slice(_startIndex, _endIndex));
     }
 
-    const DrawerHeader = styled('div')(({ theme }) => ({
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: theme.spacing(0, 1),
-        // necessary for content to be below app bar
-        ...theme.mixins.toolbar,
-    }));
-
     return (
         <Box sx={{
             display: 'flex',
@@ -253,7 +244,7 @@ export default function Marketplace() {
                     </Box>
                     <Box>
                         {
-                            nftList &&
+                            nftList?.length > 0 &&
                             <div style={{
                                 display: 'flex',
                                 flexDirection: 'row',

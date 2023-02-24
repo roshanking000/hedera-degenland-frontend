@@ -9,6 +9,12 @@ import {
   AccountAllowanceApproveTransaction,
   TokenAssociateTransaction,
   AccountAllowanceDeleteTransaction,
+  ScheduleCreateTransaction,
+  Client,
+  PrivateKey,
+  ScheduleInfoQuery,
+  ScheduleSignTransaction,
+  ScheduleDeleteTransaction,
 } from '@hashgraph/sdk';
 import * as env from "../../env.js";
 
@@ -275,22 +281,18 @@ export default function HashConnectProvider({
     return false;
   }
 
-  const buyNFT = async (nftInfo_, hbarAmount_) => {
+  const buyNFT = async (sellerId_, hbarAmount_) => {
     const _accountId = saveData.accountIds[0];
     const _provider = hashConnect.getProvider(netWork, saveData.topic, _accountId);
     const _signer = hashConnect.getSigner(_provider);
-    const _treasuryId = AccountId.fromString(env.TREASURY_ID);
+    const _sellerId = AccountId.fromString(sellerId_);
 
     const allowanceTx = new TransferTransaction();
     if (hbarAmount_ != 0) {
       const sendBal = new Hbar(hbarAmount_);
-
-      allowanceTx.addApprovedHbarTransfer(_accountId, sendBal.negated())
-      allowanceTx.addHbarTransfer(_treasuryId, sendBal)
+      allowanceTx.addHbarTransfer(_accountId, sendBal.negated());
+      allowanceTx.addHbarTransfer(_sellerId, sendBal);
     }
-
-    const _nft = new NftId(TokenId.fromString(nftInfo_.token_id), parseInt(nftInfo_.serial_number));
-    allowanceTx.addApprovedNftTransfer(_nft, _treasuryId, _accountId);
 
     const allowanceFreeze = await allowanceTx.freezeWithSigner(_signer);
     if (!allowanceFreeze) return false;
@@ -302,9 +304,9 @@ export default function HashConnectProvider({
 
     if (allowanceRx.status._code === 22)
       return true;
-
     return false;
   }
+
 
   const sendHbarAndNftToTreasury = async (amount_, tokenId_, serialNum_) => {
     // console.log("************************ sendHbarAndNftToTreasury 0 : ");

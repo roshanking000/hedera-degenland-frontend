@@ -18,7 +18,7 @@ class Tile extends Phaser.GameObjects.Sprite {
 		this.setScale(0.5);
 		this.ground_count = 1;
 		this.road_count = 11;
-		this.building_count = 19;
+		this.building_count = 21;
 		this.object_count = 10;
 
 		this.game = scene;
