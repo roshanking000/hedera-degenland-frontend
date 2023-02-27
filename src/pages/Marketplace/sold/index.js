@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory } from "react-router-dom";
-
-import { styled, useTheme } from '@mui/material/styles';
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -14,66 +11,46 @@ import {
     CircularProgress,
     Box,
     Tab,
-    Pagination
+    Pagination,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
 } from '@mui/material';
 
-import {
-    TabList,
-    TabContext,
-    TabPanel
-} from '@mui/lab';
-
-import { useHashConnect } from "../../../assets/api/HashConnectAPIProvider.tsx";
 import { getRequest, postRequest } from "../../../assets/api/apiRequests";
 import * as env from "../../../env";
 
 import NavBar from '../../../components/NavBar';
-import NFTCard from "../../../components/NFTCard";
 
-const pagenationDisplayCount = 24;
+function createData(name, calories, fat, carbs, protein) {
+    return { name, calories, fat, carbs, protein };
+}
+
+const rows = [
+    createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
+    createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
+    createData('Eclair', 262, 16.0, 24, 6.0),
+    createData('Cupcake', 305, 3.7, 67, 4.3),
+    createData('Gingerbread', 356, 16.0, 49, 3.9),
+];
 
 export default function Sold() {
-    const { walletData } = useHashConnect();
-    const { accountIds } = walletData;
 
-    let history = useHistory();
     const [loadingView, setLoadingView] = useState(false);
-    const [profileData, setProfileData] = useState(null);
-    const [walletNftInfo, setWalletNftInfo] = useState(null);
-    const [listingNftInfo, setListingNftInfo] = useState(null);
-
-    const [nftPageIndex, setNftPageIndex] = useState(1);
-    const [currentPageNftList, setCurrentPageNftList] = useState([]);
-
-    const [tabValue, setTabValue] = useState('Owned');
+    const [soldNftList, setSoldNftList] = useState(null);
 
     useEffect(() => {
-        if (accountIds?.length > 0) {
-            getProfileData(accountIds[0]);
-            getWalletMyNftData(accountIds[0]);
-        }
-    }, [accountIds]);
-
-    useEffect(() => {
-        if (walletNftInfo)
-            resetNftListToDisplay(1, walletNftInfo);
-    }, [walletNftInfo]);
-
-    useEffect(() => {
-        if (listingNftInfo)
-            resetNftListToDisplay(1, listingNftInfo);
-    }, [listingNftInfo]);
-
-    const resetNftListToDisplay = (pageIndex_, nftList_) => {
-        let _startIndex = (pageIndex_ - 1) * pagenationDisplayCount;
-        let _endIndex = pageIndex_ * pagenationDisplayCount > nftList_.length ? nftList_.length : pageIndex_ * pagenationDisplayCount;
-        setCurrentPageNftList(nftList_.slice(_startIndex, _endIndex));
-    }
+        getSoldNfts();
+    }, []);
 
     // load profile data
-    const getProfileData = async (accountId) => {
+    const getSoldNfts = async () => {
         setLoadingView(true);
-        const _res = await getRequest(env.SERVER_URL + "/api/account/get_player?accountId=" + accountId);
+        const _res = await getRequest(env.SERVER_URL + "/api/soldnftlist/get_sold_list");
         if (!_res) {
             toast.error("Something wrong with server!");
             setLoadingView(false);
@@ -84,122 +61,9 @@ export default function Sold() {
             setLoadingView(false);
             return;
         }
-        setProfileData(_res.data);
-    }
-
-    // load nfts info
-    const getWalletMyNftData = async (accountId_) => {
-        let _nextLink = null;
-        let _newWalletNftInfo = [];
-
-        let _WNinfo = await getRequest(env.MIRROR_NET_URL + "/api/v1/accounts/" + accountId_ + "/nfts");
-        if (!_WNinfo) {
-            toast.error("Something wrong with network!");
-            setLoadingView(false);
-            return;
-        }
-
-        if (_WNinfo && _WNinfo.nfts.length > 0)
-            _nextLink = _WNinfo.links.next;
-
-        while (1) {
-            let _tempNftInfo = _WNinfo.nfts;
-
-            for (let i = 0; i < _tempNftInfo.length; i++) {
-                let _nftInfoResponse = await getNftInfoFromMirrorNet(_tempNftInfo[i].token_id, _tempNftInfo[i].serial_number);
-
-                if (_nftInfoResponse.result) {
-                    _newWalletNftInfo.push({
-                        token_id: _tempNftInfo[i].token_id,
-                        serial_number: _tempNftInfo[i].serial_number,
-                        imageUrl: _nftInfoResponse.metaData.imageUrl,
-                        name: _nftInfoResponse.metaData.name,
-                        creator: _nftInfoResponse.metaData.creator,
-                    })
-                }
-            }
-            if (!_nextLink || _nextLink === null) break;
-
-            _WNinfo = await getRequest(env.MIRROR_NET_URL + _nextLink);
-            _nextLink = null;
-            if (_WNinfo && _WNinfo.nfts.length > 0)
-                _nextLink = _WNinfo.links.next;
-        }
-        setWalletNftInfo(_newWalletNftInfo);
+        setSoldNftList(_res.data);
         setLoadingView(false);
     }
-
-    const getNftInfoFromMirrorNet = async (tokenId_, serialNum_) => {
-        const g_singleNftInfo = await getRequest(`${env.MIRROR_NET_URL}/api/v1/tokens/${tokenId_}/nfts?serialNumber=${serialNum_}`);
-        if (g_singleNftInfo && g_singleNftInfo.nfts.length > 0) {
-            let g_preMdUrl = base64ToUtf8(g_singleNftInfo.nfts[0].metadata).split("//");
-
-            let _metadataUrl = env.IPFS_URL + g_preMdUrl[g_preMdUrl.length - 1];
-            const _metadataInfo = await getRequest(_metadataUrl); // get NFT metadata
-            if (_metadataInfo && _metadataInfo.image != undefined) {
-                let _imageUrlList = _metadataInfo.image.split('/');
-                let _imageUrlLen = _imageUrlList?.length;
-                const _imageUrl = env.IPFS_URL + _imageUrlList[_imageUrlLen - 2] + "/" + _imageUrlList[_imageUrlLen - 1];
-
-                console.log(_metadataInfo);
-                const _metaData = {
-                    creator: _metadataInfo.creator,
-                    name: _metadataInfo.name,
-                    imageUrl: _imageUrl
-                };
-                return { result: true, metaData: _metaData };
-            }
-            return { result: false };
-        }
-        return { result: false };
-    }
-
-    const getNftListing = async () => {
-        setLoadingView(true);
-        const _res = await getRequest(env.SERVER_URL + "/api/marketplace/get_list_by_accountid?accountId=" + accountIds[0]);
-        if (!_res) {
-            toast.error("Something wrong with server!");
-            setLoadingView(false);
-            return;
-        }
-        if (!_res.result) {
-            toast.error(_res.error);
-            setLoadingView(false);
-            return;
-        }
-        setListingNftInfo(_res.data);
-        setLoadingView(false);
-    }
-
-    // convert metadata base64 string to utf8
-    const base64ToUtf8 = (base64Str_) => {
-        // create a buffer
-        const _buff = Buffer.from(base64Str_, 'base64');
-
-        // decode buffer as UTF-8
-        const _utf8Str = _buff.toString('utf-8');
-
-        return _utf8Str;
-    }
-
-    const handleTabChange = (event, newValue) => {
-        setCurrentPageNftList([]);
-        setTabValue(newValue);
-        if (newValue == 'Owned')
-            resetNftListToDisplay(1, walletNftInfo);
-        else if (newValue == 'Listings')
-            getNftListing();
-//        else if (newValue == 'Collections')
-    };
-
-    const DrawerHeader = styled('div')(({ theme }) => ({
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: theme.spacing(0, 1),
-        // necessary for content to be below app bar
-        ...theme.mixins.toolbar,
-    }));
 
     return (
         <Box sx={{
@@ -216,248 +80,272 @@ export default function Sold() {
                 backgroundColor: '#ffc0ff',
                 marginLeft: '5rem'
             }}>
-                {/* account info */}
-                {
-                    profileData &&
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginTop: '100px',
-                        marginBottom: '10px',
-                        position: 'relative'
+                <div style={{
+                    paddingLeft: '2rem',
+                    paddingRight: '2rem',
+                    maxWidth: '80rem',
+                    paddingTop: '3rem',
+                    paddingBottom: '3rem',
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
+                }}>
+                    <h2 style={{
+                        letterSpacing: '-.025em',
+                        fontWeight: '800',
+                        fontSize: '1.5rem',
+                        lineHeight: '2rem',
+                        margin: 0,
+                        fontFamily: 'Poppins,sans-serif',
+                        textAlign: 'center',
+                        color: '#873135',
                     }}>
-                        <Avatar alt={profileData.accountId} src={env.SERVER_URL + profileData.avatarUrl}
-                            sx={{
-                                width: 128,
-                                height: 128,
-                                fontSize: '64px',
-                                backgroundColor: '#e0e0e0',
-                                border: '2px solid white'
-                            }}
-                        />
+                        Sold NFTs
+                    </h2>
+                    {/*
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
+                        maxWidth: '800px',
+                        paddginTop: '0.25rem',
+                        paddingBottom: '0.25rem',
+                        paddgingLeft: '0.5rem',
+                        paddgingRight: '0.5rem',
+                        marginTop: '0.5rem',
+                        marginBottom: '0.5rem',
+                        marginLeft: 'auto',
+                        marginRight: 'auto',
+                        borderRadius: '0.5rem',
+                        lineStyle: 'none',
+                        fontFamily: 'Poppins,sans-serif',
+                        textAlign: 'center',
+                        color: '#fff',
+                    }}>
+                        <div style={{
+                            padding: '0.75rem',
+                            backgroundColor: 'rgba(31,41,55,1)',
+                            borderRadius: '0.5rem',
+                            margin: '0.25rem',
+                        }}>
+                            <div style={{
+                                color: 'rgba(156,163,175,1)',
+                                fontSize: '.75rem',
+                                lineHeight: '1rem',
+                                marginBottom: '0.25rem',
+                            }}>
+                                TOTAL VOLUME
+                            </div>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                rowGap: '0.25rem',
+                                columnGap: '1rem',
+                                flexWrap: 'wrap',
+                            }}>
+                                <p style={{
+                                    textTransform: 'capitalize',
+                                    fontWeight: '500',
+                                    fontSize: '.875rem',
+                                    lineHeight: '1.25rem',
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto',
+                                    margin: 0,
+                                    textAlign: 'center',
+                                }}>
+                                    139,417,606.864 HBAR
+                                </p>
+                            </div>
+                        </div>
+                        <div style={{
+                            padding: '0.75rem',
+                            backgroundColor: 'rgba(31,41,55,1)',
+                            borderRadius: '0.5rem',
+                            margin: '0.25rem',
+                        }}>
+                            <div style={{
+                                color: 'rgba(156,163,175,1)',
+                                fontSize: '.75rem',
+                                lineHeight: '1rem',
+                                marginBottom: '0.25rem',
+                            }}>
+                                AVG SALE PRICE
+                            </div>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                rowGap: '0.25rem',
+                                columnGap: '1rem',
+                                flexWrap: 'wrap',
+                            }}>
+                                <p style={{
+                                    textTransform: 'capitalize',
+                                    fontWeight: '500',
+                                    fontSize: '.875rem',
+                                    lineHeight: '1.25rem',
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto',
+                                    margin: 0,
+                                    textAlign: 'center',
+                                }}>
+                                    1,427.27 HBAR
+                                </p>
+                            </div>
+                        </div>
+                        <div style={{
+                            padding: '0.75rem',
+                            backgroundColor: 'rgba(31,41,55,1)',
+                            borderRadius: '0.5rem',
+                            margin: '0.25rem',
+                        }}>
+                            <div style={{
+                                color: 'rgba(156,163,175,1)',
+                                fontSize: '.75rem',
+                                lineHeight: '1rem',
+                                marginBottom: '0.25rem',
+                            }}>
+                                TOTAL ITEMS SOLD
+                            </div>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                rowGap: '0.25rem',
+                                columnGap: '1rem',
+                                flexWrap: 'wrap',
+                            }}>
+                                <p style={{
+                                    textTransform: 'capitalize',
+                                    fontWeight: '500',
+                                    fontSize: '.875rem',
+                                    lineHeight: '1.25rem',
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto',
+                                    margin: 0,
+                                }}>
+                                    97,681
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    */}
+                    <div style={{
+                        padding: '2rem 2rem 2rem 2rem',
+                        width: '1024px',
+                        margin: 'auto'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center'
+                        }}>
+                            <h2 style={{
+                                color: '#873135',
+                                fontSize: '1.25rem',
+                                lineHeight: '1.75rem',
+                                paddginLeft: '0.5rem',
+                                fontWeight: 'inherit',
+                                margin: 0,
+                            }}>
+                                Recent sales
+                            </h2>
+                        </div>
+                        <div style={{
+                            display: 'flex',
+                            position: 'relative',
+                            alignItems: 'center',
+                            paddingTop: '0.5rem',
+                        }}>
+                            <div style={{
+                                flexGrow: '1',
+                                border: '1px solid #873135',
+                            }}>
+                            </div>
+                        </div>
                         <div style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            marginLeft: '20px'
+                            margin: '2rem 0',
+                            overflowX: 'auto',
+                            verticalAlign: 'middle',
+                            minWidth: '100%',
+                            border: '2px solid #873135',
+                            borderRadius: '0.5rem',
                         }}>
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center'
-                            }}>
-                                <p style={{
-                                    width: 180,
-                                    margin: '0',
-                                    fontSize: '24px',
-                                    fontWeight: '700',
-                                    color: '#873135',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis'
-                                }}>
-                                    {profileData.playerId}
-                                </p>
-                                <Button
-                                    sx={{
-                                        height: '25px',
-                                        borderRadius: '21px',
-                                        textTransform: 'none',
-                                        fontSize: 16,
-                                        fontWeight: 700,
-                                        color: 'white',
-                                        padding: '0 25px',
-                                        backgroundColor: '#e74895',
-                                        marginRight: '5px',
-                                        '&:hover': {
-                                            backgroundColor: 'grey',
-                                            boxShadow: 'none',
-                                        },
-                                        '&:focus': {
-                                            outline: 'none',
-                                            boxShadow: 'none',
+                            <TableContainer
+                                sx={{
+                                    minWidth: '100%',
+                                    borderCollapse: 'collapse',
+                                    textIndent: 0,
+                                    borderColor: 'inherit',
+                                    backgroundColor: '#ffc0ff',
+                                }}
+                                component={Paper}
+                            >
+                                <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell></TableCell>
+                                            <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">Name</TableCell>
+                                            <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">TRANSACTION TYPE</TableCell>
+                                            <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">TIME</TableCell>
+                                            <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">TOTAL AMOUNT</TableCell>
+                                            <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">BUYER</TableCell>
+                                            <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">SELLER</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {
+                                            soldNftList !== null &&
+                                            soldNftList.map((item, index) => (
+                                                <TableRow
+                                                    sx={{
+                                                        '&:hover': {
+                                                            cursor: 'pointer',
+                                                            opacity: '70%',
+                                                        },
+                                                    }}
+                                                    key={index}
+                                                >
+                                                    <TableCell align="left">
+                                                        <Avatar alt="NFT" src={item.imageUrl}
+                                                            sx={{
+                                                                width: '2.5rem',
+                                                                height: '2.5rem',
+                                                                borderRadius: '0.375rem',
+                                                                objectFit: 'contain',
+                                                                maxWidth: '100%',
+                                                            }}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell sx={{ fontSize: '1rem' }} align="left">{item.name}</TableCell>
+                                                    <TableCell align="left">
+                                                        <div
+                                                            style={{
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                color: 'whitesmoke',
+                                                                lineHeight: '1.25rem',
+                                                                fontWeight: '600',
+                                                                fontSize: '1rem',
+                                                                padding: '0 0.5rem 0 0.5rem',
+                                                                backgroundColor: 'rebeccapurple',
+                                                                borderRadius: '9999px',
+                                                            }}
+                                                        >
+                                                            {item.transactionType}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell sx={{ fontSize: '1rem' }} align="left">{item.soldTime}</TableCell>
+                                                    <TableCell sx={{ fontSize: '1rem' }} align="left">{item.totalAmount}</TableCell>
+                                                    <TableCell sx={{ fontSize: '1rem' }} align="left">{item.buyer}</TableCell>
+                                                    <TableCell sx={{ fontSize: '1rem' }} align="left">{item.seller}</TableCell>
+                                                </TableRow>
+                                            ))
                                         }
-                                    }}>
-                                    Edit
-                                </Button>
-                            </div>
-                            <LinearProgress variant='determinate' value={(profileData.currentLevelScore / profileData.targetLevelScore) * 100} />
-                            <p style={{
-                                margin: '0',
-                                fontSize: '18px',
-                                fontWeight: '700',
-                                color: '#1976d2',
-                                marginBottom: '5px'
-                            }}>
-                                Level : {profileData.level}
-                            </p>
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
                         </div>
                     </div>
-                }
-                <Box sx={{ width: '100%', typography: 'body1' }}>
-                    <TabContext value={tabValue}>
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                            <TabList onChange={handleTabChange} aria-label="lab API tabs example">
-                                <Tab label="Owned" value="Owned" />
-                                <Tab label="Listings" value="Listings" />
-                                <Tab label="Collections" value="Collections" />
-                            </TabList>
-                        </Box>
-                        <TabPanel value="Owned" sx={{
-                            '&:focus': {
-                                outline: 'none',
-                            },
-                        }}>
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                            }}>
-                                <Box>
-                                    {
-                                        currentPageNftList?.length == 0 &&
-                                        <p style={{
-                                            fontSize: 13,
-                                            fontWeight: 700,
-                                            color: '#8b1832',
-                                            margin: '5px 25px 25px 25px',
-                                            textTransform: 'none',
-                                            textAlign: 'center',
-                                        }}>
-                                            No NFT
-                                        </p>
-                                    }
-                                    {
-                                        currentPageNftList?.length > 0 &&
-                                        currentPageNftList.map((item, index) => {
-                                            return <Box key={index}
-                                                sx={{
-                                                    display: 'flex',
-                                                    flexDirection: 'row',
-                                                    float: 'left',
-                                                    width: '250px',
-                                                    padding: '5px',
-                                                    margin: '5px'
-                                                }}>
-                                                <NFTCard nftInfo={item}
-                                                    onClickNFTCard={() => {
-                                                        history.push(`/profile/${item.token_id}/${item.serial_number}`);
-                                                    }}
-                                                />
-                                            </Box>
-                                        })
-                                    }
-                                </Box>
-                                <Box>
-                                    {
-                                        walletNftInfo?.length > 0 &&
-                                        <div style={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            justifyContent: 'right',
-                                            paddingTop: '10px',
-                                            paddingRight: '10px',
-                                        }}>
-                                            <Pagination
-                                                sx={{
-                                                    '& li': {
-                                                        padding: '0',
-                                                        '& button': {
-                                                            '&:focus': {
-                                                                outline: 'none',
-                                                            },
-                                                        },
-                                                    },
-                                                }}
-                                                page={nftPageIndex}
-                                                onChange={(event, value) => {
-                                                    resetNftListToDisplay(value, walletNftInfo);
-                                                    setNftPageIndex(value);
-                                                }}
-                                                count={parseInt(walletNftInfo.length / pagenationDisplayCount) + (walletNftInfo.length % pagenationDisplayCount !== 0 ? 1 : 0)}
-                                                variant="outlined" />
-                                        </div>
-                                    }
-                                </Box>
-                            </Box>
-                        </TabPanel>
-                        <TabPanel value="Listings">
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'column'
-                            }}>
-                                <Box>
-                                    {
-                                        currentPageNftList?.length == 0 &&
-                                        <p style={{
-                                            fontSize: 13,
-                                            fontWeight: 700,
-                                            color: '#8b1832',
-                                            margin: '5px 25px 25px 25px',
-                                            textTransform: 'none',
-                                            textAlign: 'center',
-                                        }}>
-                                            No NFT
-                                        </p>
-                                    }
-                                    {
-                                        currentPageNftList?.length > 0 &&
-                                        currentPageNftList.map((item, index) => {
-                                            return <Box key={index}
-                                                sx={{
-                                                    display: 'flex',
-                                                    flexDirection: 'row',
-                                                    float: 'left',
-                                                    width: '250px',
-                                                    padding: '5px',
-                                                    margin: '5px'
-                                                }}>
-                                                <NFTCard nftInfo={item}
-                                                    onClickNFTCard={() => {
-                                                        history.push(`/profile/${item.token_id}/${item.serial_number}`);
-                                                    }}
-                                                />
-                                            </Box>
-                                        })
-                                    }
-                                </Box>
-                                <Box>
-                                    {
-                                        listingNftInfo?.length > 0 && 
-                                        <div style={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            justifyContent: 'right',
-                                            paddingTop: '10px',
-                                            paddingRight: '10px',
-                                        }}>
-                                            <Pagination
-                                                sx={{
-                                                    '& li': {
-                                                        padding: '0',
-                                                        '& button': {
-                                                            '&:focus': {
-                                                                outline: 'none',
-                                                            },
-                                                        },
-                                                    },
-                                                }}
-                                                page={nftPageIndex}
-                                                onChange={(event, value) => {
-                                                    resetNftListToDisplay(value, listingNftInfo);
-                                                    setNftPageIndex(value);
-                                                }}
-                                                count={parseInt(listingNftInfo.length / pagenationDisplayCount) + (listingNftInfo.length % pagenationDisplayCount !== 0 ? 1 : 0)}
-                                                variant="outlined" />
-                                        </div>
-                                    }
-                                </Box>
-                            </Box>
-                        </TabPanel>
-                        <TabPanel value="Collections">Item Three</TabPanel>
-                    </TabContext>
-                </Box>
+                </div>
             </Box>
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -468,3 +356,15 @@ export default function Sold() {
         </Box>
     );
 }
+
+const TABLE_HEAD_CELL_STYLE = {
+    fontSize: '1rem',
+    fontWeight: '600',
+    lineHeight: '1.25rem',
+    color: '#873135',
+};
+
+const TABLE_TD_STYLE = {
+    padding: '1rem 1.5rem 1rem 1.5rem',
+    whiteSpace: 'nowrap',
+};
