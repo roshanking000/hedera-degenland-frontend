@@ -16,9 +16,7 @@ import * as env from "../../env";
 
 const TITLE_COLOR = '#8b1832';
 
-function PlaceDetailDlg({
-  placeInfo,
-  onClickConstructionBtn,
+function OfferDlg({
   onClickVisitBtn,
   onClickCancelBtn
 }) {
@@ -441,7 +439,7 @@ function PlaceDetailDlg({
         padding: '0 20px'
       }}>
         {
-          (playerInfoStore.data.playerId == placeInfo.ownerInfo.playerId || playerInfoStore.data.playerId == 'phoenix') && 
+          playerInfoStore.data.playerId == placeInfo.ownerInfo.playerId && 
           <Button onClick={onClickConstructionBtn}
             sx={{
               height: '42px',
@@ -516,4 +514,4 @@ function PlaceDetailDlg({
   );
 }
 
-export default PlaceDetailDlg;
+export default OfferDlg;

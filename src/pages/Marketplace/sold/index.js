@@ -258,92 +258,119 @@ export default function Sold() {
                             }}>
                             </div>
                         </div>
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            margin: '2rem 0',
-                            overflowX: 'auto',
-                            verticalAlign: 'middle',
-                            minWidth: '100%',
-                            border: '2px solid #873135',
-                            borderRadius: '0.5rem',
-                        }}>
-                            <TableContainer
-                                sx={{
-                                    minWidth: '100%',
-                                    borderCollapse: 'collapse',
-                                    textIndent: 0,
-                                    borderColor: 'inherit',
-                                    backgroundColor: '#ffc0ff',
-                                }}
-                                component={Paper}
-                            >
-                                <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell></TableCell>
-                                            <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">Name</TableCell>
-                                            <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">TRANSACTION TYPE</TableCell>
-                                            <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">TIME</TableCell>
-                                            <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">TOTAL AMOUNT</TableCell>
-                                            <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">BUYER</TableCell>
-                                            <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">SELLER</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {
-                                            soldNftList !== null &&
-                                            soldNftList.map((item, index) => (
-                                                <TableRow
-                                                    sx={{
-                                                        '&:hover': {
-                                                            cursor: 'pointer',
-                                                            opacity: '70%',
-                                                        },
-                                                    }}
-                                                    key={index}
-                                                >
-                                                    <TableCell align="left">
-                                                        <Avatar alt="NFT" src={item.imageUrl}
-                                                            sx={{
-                                                                width: '2.5rem',
-                                                                height: '2.5rem',
-                                                                borderRadius: '0.375rem',
-                                                                objectFit: 'contain',
-                                                                maxWidth: '100%',
-                                                            }}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell sx={{ fontSize: '1rem' }} align="left">{item.name}</TableCell>
-                                                    <TableCell align="left">
-                                                        <div
-                                                            style={{
-                                                                display: 'inline-flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                color: 'whitesmoke',
-                                                                lineHeight: '1.25rem',
-                                                                fontWeight: '600',
-                                                                fontSize: '1rem',
-                                                                padding: '0 0.5rem 0 0.5rem',
-                                                                backgroundColor: 'rebeccapurple',
-                                                                borderRadius: '9999px',
-                                                            }}
-                                                        >
-                                                            {item.transactionType}
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell sx={{ fontSize: '1rem' }} align="left">{item.soldTime}</TableCell>
-                                                    <TableCell sx={{ fontSize: '1rem' }} align="left">{item.totalAmount}</TableCell>
-                                                    <TableCell sx={{ fontSize: '1rem' }} align="left">{item.buyer}</TableCell>
-                                                    <TableCell sx={{ fontSize: '1rem' }} align="left">{item.seller}</TableCell>
-                                                </TableRow>
-                                            ))
-                                        }
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </div>
+                        {
+                            soldNftList?.length === 0 &&
+                            <div style={{
+                                color: '#873135',
+                                fontSize: '1rem',
+                                margin: '2rem 0',
+                                textAlign: 'center',
+                            }}>No data</div>
+                        }
+                        {
+                            soldNftList?.length > 0 &&
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                margin: '2rem 0',
+                                overflowX: 'auto',
+                                verticalAlign: 'middle',
+                                minWidth: '100%',
+                                border: '2px solid #873135',
+                                borderRadius: '0.5rem',
+                            }}>
+                                <TableContainer
+                                    sx={{
+                                        minWidth: '100%',
+                                        borderCollapse: 'collapse',
+                                        textIndent: 0,
+                                        borderColor: 'inherit',
+                                        backgroundColor: '#ffc0ff',
+                                    }}
+                                    component={Paper}
+                                >
+                                    <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell></TableCell>
+                                                <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">Name</TableCell>
+                                                <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">TRANSACTION TYPE</TableCell>
+                                                <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">TIME</TableCell>
+                                                <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">TOTAL AMOUNT</TableCell>
+                                                <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">BUYER</TableCell>
+                                                <TableCell sx={TABLE_HEAD_CELL_STYLE} align="left">SELLER</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {
+                                                soldNftList.map((item, index) => (
+                                                    <TableRow
+                                                        sx={{
+                                                            '&:hover': {
+                                                                cursor: 'pointer',
+                                                                opacity: '70%',
+                                                            },
+                                                        }}
+                                                        key={index}
+                                                    >
+                                                        <TableCell align="left">
+                                                            <div style={{
+                                                                position: 'relative',
+                                                            }}>
+                                                                <video style={{
+                                                                    position: 'absolute',
+                                                                    display: 'block',
+                                                                    verticalAlign: 'middle',
+                                                                    borderRadius: '0.375rem',
+                                                                    maxWidth: '100%',
+                                                                    width: '2.5rem',
+                                                                    height: '2.5rem',
+                                                                }} autoPlay loop>
+                                                                    <source src={item.imageUrl} />
+                                                                </video>
+                                                                <img alt='' src={item.imageUrl}
+                                                                    style={{
+                                                                        display: 'block',
+                                                                        verticalAlign: 'middle',
+                                                                        width: '2.5rem',
+                                                                        height: '2.5rem',
+                                                                        borderRadius: '0.375rem',
+                                                                        maxWidth: '100%',
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell sx={{ fontSize: '1rem' }} align="left">{item.name}</TableCell>
+                                                        <TableCell align="left">
+                                                            <div
+                                                                style={{
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    color: 'whitesmoke',
+                                                                    lineHeight: '1.25rem',
+                                                                    fontWeight: '600',
+                                                                    fontSize: '1rem',
+                                                                    padding: '0 0.5rem 0 0.5rem',
+                                                                    backgroundColor: 'rebeccapurple',
+                                                                    borderRadius: '9999px',
+                                                                }}
+                                                            >
+                                                                {item.transactionType}
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell sx={{ fontSize: '1rem' }} align="left">{item.soldTime}</TableCell>
+                                                        <TableCell sx={{ fontSize: '1rem' }} align="left">{item.totalAmount}</TableCell>
+                                                        <TableCell sx={{ fontSize: '1rem' }} align="left">{item.buyer}</TableCell>
+                                                        <TableCell sx={{ fontSize: '1rem' }} align="left">{item.seller}</TableCell>
+                                                    </TableRow>
+                                                ))
+                                            }
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </div>
+                        }
                     </div>
                 </div>
             </Box>

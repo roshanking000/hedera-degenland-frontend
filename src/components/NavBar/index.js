@@ -16,6 +16,7 @@ import {
     PersonOutline,
     LocalGroceryStoreOutlined,
     LeaderboardOutlined,
+    CollectionsOutlined,
 } from '@mui/icons-material';
 
 export default function NavBar() {
@@ -108,8 +109,8 @@ export default function NavBar() {
                                     fontWeight: '500',
                                 }}>Marketplace</p>
                             </Box>
-                            <Box sx={APPBAR_STYLE} onClick={() => history.push('/profiles')}>
-                                <PersonOutline fontSize='medium' sx={{
+                            <Box sx={APPBAR_STYLE} onClick={() => history.push('/collections')}>
+                                <CollectionsOutlined fontSize='medium' sx={{
                                     display: 'block',
                                     verticalAlign: 'middle',
                                     color: 'rgba(156,163,175,1)',
@@ -122,7 +123,7 @@ export default function NavBar() {
                                     marginLeft: '15px',
                                     fontSize: '14px',
                                     fontWeight: '500',
-                                }}>Profile</p>
+                                }}>Collections</p>
                             </Box>
                             <Box sx={APPBAR_STYLE} onClick={() => history.push('/sold')}>
                                 <LeaderboardOutlined fontSize='medium' sx={{
@@ -139,6 +140,22 @@ export default function NavBar() {
                                     fontSize: '14px',
                                     fontWeight: '500',
                                 }}>Sold</p>
+                            </Box>
+                            <Box sx={APPBAR_STYLE} onClick={() => history.push('/profiles')}>
+                                <PersonOutline fontSize='medium' sx={{
+                                    display: 'block',
+                                    verticalAlign: 'middle',
+                                    color: 'rgba(156,163,175,1)',
+                                    flexShrink: 0,
+                                    width: '1.5rem',
+                                    height: '1.5rem',
+                                }} />
+                                <p style={{
+                                    margin: 0,
+                                    marginLeft: '15px',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                }}>Profile</p>
                             </Box>
                         </nav>
                     </div>

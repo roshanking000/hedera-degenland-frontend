@@ -41,6 +41,7 @@ export default function Profile() {
     const [profileData, setProfileData] = useState(null);
     const [walletNftInfo, setWalletNftInfo] = useState(null);
     const [listingNftInfo, setListingNftInfo] = useState(null);
+    const [collectionList, setCollectionList] = useState(null);
 
     const [nftPageIndex, setNftPageIndex] = useState(1);
     const [currentPageNftList, setCurrentPageNftList] = useState([]);
@@ -141,7 +142,6 @@ export default function Profile() {
                 let _imageUrlLen = _imageUrlList?.length;
                 const _imageUrl = env.IPFS_URL + _imageUrlList[_imageUrlLen - 2] + "/" + _imageUrlList[_imageUrlLen - 1];
 
-                console.log(_metadataInfo);
                 const _metaData = {
                     creator: _metadataInfo.creator,
                     name: _metadataInfo.name,
@@ -171,6 +171,27 @@ export default function Profile() {
         setLoadingView(false);
     }
 
+    const getCollectionListing = async () => {
+        let _collectionList = [];
+        for (let i = 0; i < walletNftInfo.length; i++) {
+            let _creator = walletNftInfo[i].creator;
+            let _imageUrl = walletNftInfo[i].imageUrl;
+            let _flag = 0;
+            for (let j = 0; j < _collectionList.length; j++) {
+                if (_creator == _collectionList[j].creator)
+                    _flag = 1;
+            }
+            if (_flag == 0) {
+                _collectionList.push({
+                    imageUrl: _imageUrl,
+                    creator: _creator
+                });
+            }
+        }
+        console.log(_collectionList);
+        setCollectionList(_collectionList);
+    }
+
     // convert metadata base64 string to utf8
     const base64ToUtf8 = (base64Str_) => {
         // create a buffer
@@ -189,17 +210,9 @@ export default function Profile() {
             resetNftListToDisplay(1, walletNftInfo);
         else if (newValue == 'Listings')
             getNftListing();
-//        else if (newValue == 'Collections')
+        else if (newValue == 'Collections')
+            getCollectionListing();
     };
-
-    const DrawerHeader = styled('div')(({ theme }) => ({
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: theme.spacing(0, 1),
-        // necessary for content to be below app bar
-        ...theme.mixins.toolbar,
-    }));
 
     return (
         <Box sx={{
@@ -303,11 +316,7 @@ export default function Profile() {
                                 <Tab label="Collections" value="Collections" />
                             </TabList>
                         </Box>
-                        <TabPanel value="Owned" sx={{
-                            '&:focus': {
-                                outline: 'none',
-                            },
-                        }}>
+                        <TabPanel value="Owned">
                             <Box sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
@@ -423,7 +432,7 @@ export default function Profile() {
                                 </Box>
                                 <Box>
                                     {
-                                        listingNftInfo?.length > 0 && 
+                                        listingNftInfo?.length > 0 &&
                                         <div style={{
                                             display: 'flex',
                                             flexDirection: 'row',
@@ -455,7 +464,128 @@ export default function Profile() {
                                 </Box>
                             </Box>
                         </TabPanel>
-                        <TabPanel value="Collections">Item Three</TabPanel>
+                        <TabPanel value="Collections">
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                padding: '1.25rem 1.5rem 2.5rem 1.5rem',
+                            }}>
+                                <Box>
+                                    {
+                                        collectionList?.length == 0 &&
+                                        <p style={{
+                                            fontSize: 13,
+                                            fontWeight: 700,
+                                            color: '#8b1832',
+                                            margin: '5px 25px 25px 25px',
+                                            textTransform: 'none',
+                                            textAlign: 'center',
+                                        }}>
+                                            No Collection
+                                        </p>
+                                    }
+                                    {
+                                        collectionList?.length > 0 &&
+                                        collectionList.map((item, index) => {
+                                            return <Box key={index}>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        position: 'relative',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        width: '100%',
+                                                        textAlign: 'left',
+                                                        padding: '0.5rem 0',
+                                                        borderBottom: '1px solid #8b1832',
+                                                        margin: '0.5px 0',
+                                                        backgroundColor: '#ffc0ff',
+                                                    }}>
+                                                    <div style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                    }}>
+                                                        <div style={{
+                                                            position: 'relative',
+                                                        }}>
+                                                            <video style={{
+                                                                position: 'absolute',
+                                                                display: 'block',
+                                                                verticalAlign: 'middle',
+                                                                borderRadius: '0.375rem',
+                                                                maxWidth: '100%',
+                                                                width: '2.5rem',
+                                                                height: '2.5rem',
+                                                            }} autoPlay loop>
+                                                                <source src={item.imageUrl} />
+                                                            </video>
+                                                            <img alt='' src={item.imageUrl}
+                                                                style={{
+                                                                    display: 'block',
+                                                                    verticalAlign: 'middle',
+                                                                    width: '2.5rem',
+                                                                    height: '2.5rem',
+                                                                    borderRadius: '0.375rem',
+                                                                    maxWidth: '100%',
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div style={{
+                                                            fontSize: '1.125rem',
+                                                            fontWeight: '500',
+                                                            lineHeight: '1.5rem',
+                                                            marginLeft: '10px',
+                                                            marginRight: '10px',
+                                                        }}>
+                                                            <h2 style={{
+                                                                fontSize: '1.25rem',
+                                                                lineHeight: '1.75rem',
+                                                                fontWeight: 'inherit',
+                                                                margin: 0,
+                                                            }}>
+                                                                {item.creator}
+                                                            </h2>
+                                                        </div>
+                                                    </div>
+                                                </Box>
+                                            </Box>
+                                        })
+                                    }
+                                </Box>
+                                <Box>
+                                    {
+                                        collectionList?.length > 0 &&
+                                        <div style={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'right',
+                                            paddingTop: '10px',
+                                            paddingRight: '10px',
+                                        }}>
+                                            <Pagination
+                                                sx={{
+                                                    '& li': {
+                                                        padding: '0',
+                                                        '& button': {
+                                                            '&:focus': {
+                                                                outline: 'none',
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                                page={nftPageIndex}
+                                                onChange={(event, value) => {
+                                                    resetNftListToDisplay(value, collectionList);
+                                                    setNftPageIndex(value);
+                                                }}
+                                                count={parseInt(collectionList.length / pagenationDisplayCount) + (collectionList.length % pagenationDisplayCount !== 0 ? 1 : 0)}
+                                                variant="outlined" />
+                                        </div>
+                                    }
+                                </Box>
+                            </Box>
+                        </TabPanel>
                     </TabContext>
                 </Box>
             </Box>

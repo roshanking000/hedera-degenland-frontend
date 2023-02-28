@@ -24,6 +24,7 @@ import {
     RemoveRedEyeOutlined,
     SellOutlined,
     Done,
+    NotificationsOutlined,
 } from '@mui/icons-material';
 
 import { useHashConnect } from "../../../../assets/api/HashConnectAPIProvider.tsx";
@@ -41,6 +42,7 @@ export default function ItemDetail() {
 
     const [loadingView, setLoadingView] = useState(false);
     const [buySuccessfulViewFlag, setBuySuccessfulViewFlag] = useState(false);
+    const [offerDialogViewFlag, setOfferDialogViewFlag] = useState(false);
 
     const [itemDetailInfo, setItemDetailInfo] = useState(null);
     const [nftInfo, setNftInfo] = useState(null);
@@ -174,743 +176,855 @@ export default function ItemDetail() {
     return (
         <Box sx={{ flexGrow: 1 }}>
             <NavBar />
-            {
-                nftInfo &&
-                <Box component="main" sx={{
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column'
+            }}>
+                <div style={{
                     display: 'flex',
-                    flexDirection: 'column',
-                    flexGrow: 1,
-                    p: 3,
-                    backgroundColor: '#ffc0ff',
-                    marginLeft: '5rem'
+                    position: 'sticky',
+                    justifyContent: 'end',
+                    alignItems: 'center',
+                    height: '4rem',
+                    backgroundColor: '#121212',
+                    zIndex: '40',
+                    top: 0,
                 }}>
-                    <Paper
-                        sx={{
-                            padding: '10px',
-                            maxWidth: 1216,
-                            my: 1,
-                            mx: 'auto',
-                            p: 2,
-                            backgroundColor: '#ffc0ff',
-                            boxShadow: 'none',
+                    <div style={{
+                        display: 'flex',
+                        columnGap: '0.5rem',
+                        marginRight: '1rem',
+                    }}>
+                        <NotificationsOutlined
+                            sx={{
+                                color: 'whitesmoke',
+                            }}
+                            fontSize='large'
+                        />
+                        <Button onClick={() => {
+                            history.push('/profiles');
                         }}
-                    >
-                        <Grid container spacing={2}>
-                            <Grid item xs={6}>
-                                <Box
-                                    sx={{
-                                        position: 'relative',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        padding: '5px',
-                                        margin: '5px',
-                                        maxWidth: '600px',
-                                    }}>
-                                    <img alt='' src={nftInfo.imageUrl} style={{
-                                        borderRadius: '0.375rem',
-                                    }} />
-                                    <video style={{
-                                        borderRadius: '0.375rem',
-                                    }} autoPlay loop>
-                                        <source src={nftInfo.imageUrl} />
-                                    </video>
-                                </Box>
-                            </Grid>
-                            <Grid item xs={6}>
-                                {/* 1 part */}
-                                <h1 style={{
-                                    letterSpacing: '-.025em',
-                                    fontWeight: '800',
-                                    fontSize: '1.875rem',
-                                    lineHeight: '2.25rem',
-                                    textTransform: 'none',
-                                    margin: '0'
-                                }}>
-                                    {nftInfo.name}
-                                </h1>
-                                <p style={{
-                                    color: 'blue',
-                                    marginTop: '0.25rem',
-                                    fontWeight: '500',
-                                }}>
-                                    {nftInfo.creator}
-                                </p>
-                                {/* 2 part */}
-                                <div style={{
-                                    display: 'flex',
-                                    color: 'black',
-                                    rowGap: '0.5rem',
-                                    alignItems: 'center',
-                                    flexWrap: 'wrap',
-                                    marginTop: '0.5rem',
-                                    marginBottom: '1rem',
-                                }}>
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        marginRight: '1.5rem',
-                                    }}>
-                                        <p style={{
-                                            marginRight: '0.25rem',
-                                            margin: 0,
-                                            fontWeight: '500',
+                            variant='outlined'
+                            sx={{
+                                color: 'blueviolet',
+                                fontWeight: '700',
+                                padding: '0.25rem 1rem 0.25rem 1rem',
+                                backgroundColor: 'rgba(17,24,39,1)',
+                                borderColor: 'blueviolet',
+                                borderWidth: '2px',
+                                borderRadius: '0.5rem',
+                                lineHeight: 'inherit',
+                                fontSize: '100%',
+                                '&:hover': {
+                                    color: 'white',
+                                    backgroundColor: 'blueviolet',
+                                    borderColor: 'blueviolet',
+                                },
+                                '&:focus': {
+                                    outline: 'none',
+                                    boxShadow: 'none',
+                                }
+                            }}>
+                            Profile
+                        </Button>
+                        <Button onClick={() => {
+
+                        }}
+                            variant='outlined'
+                            sx={{
+                                color: 'gray',
+                                fontWeight: '700',
+                                padding: '0.25rem 1rem 0.25rem 1rem',
+                                backgroundColor: 'rgba(17,24,39,1)',
+                                borderColor: 'gray',
+                                borderWidth: '2px',
+                                borderRadius: '0.5rem',
+                                lineHeight: 'inherit',
+                                fontSize: '100%',
+                                '&:hover': {
+                                    borderWidth: '2px',
+                                    color: 'whitesmoke',
+                                    borderColor: 'whitesmoke',
+                                },
+                                '&:focus': {
+                                    outline: 'none',
+                                    boxShadow: 'none',
+                                }
+                            }}>
+                            Logout
+                        </Button>
+                    </div>
+                </div>
+                {
+                    nftInfo &&
+                    <Box component="main" sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        flexGrow: 1,
+                        p: 3,
+                        backgroundColor: '#ffc0ff',
+                        marginLeft: '5rem'
+                    }}>
+                        <Paper
+                            sx={{
+                                padding: '10px',
+                                maxWidth: 1216,
+                                my: 1,
+                                mx: 'auto',
+                                p: 2,
+                                backgroundColor: '#ffc0ff',
+                                boxShadow: 'none',
+                            }}
+                        >
+                            <Grid container spacing={2}>
+                                <Grid item xs={6}>
+                                    <Box
+                                        sx={{
+                                            position: 'relative',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            padding: '5px',
+                                            margin: '5px',
+                                            maxWidth: '600px',
                                         }}>
-                                            Owned by {itemDetailInfo.owner_playerid}
-                                        </p>
-                                    </div>
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        marginRight: '1.5rem',
-                                    }}>
-                                        {
-                                            isFavourites == false &&
-                                            <FavoriteBorderOutlined fontSize='large'
-                                                sx={{
-                                                    display: 'block',
-                                                    verticalAlign: 'middle',
-                                                    marginRight: '0.5rem',
-                                                    height: '1.5rem',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={async () => {
-                                                    if (isFavourites == false) {
-                                                        setLoadingView(true);
-                                                        const _postData = {
-                                                            id: id,
-                                                            accountId: accountIds[0]
-                                                        };
-                                                        const _res = await postRequest(env.SERVER_URL + "/api/marketplace/set_favourites", _postData);
-                                                        if (!_res) {
-                                                            toast.error("Something wrong with server!");
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        if (!_res.result) {
-                                                            toast.error(_res.error);
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        setIsFavourites(true);
-                                                        setFavourites(_res.data.favourites);
-                                                        setLoadingView(false);
-                                                    }
-                                                }}
-                                            />
-                                        }
-                                        {
-                                            isFavourites == true &&
-                                            <FavoriteBorderOutlined fontSize='large'
-                                                sx={{
-                                                    display: 'block',
-                                                    verticalAlign: 'middle',
-                                                    marginRight: '0.5rem',
-                                                    height: '1.5rem',
-                                                    color: 'red',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={async () => {
-                                                    if (isFavourites == true) {
-                                                        setLoadingView(true);
-                                                        const _postData = {
-                                                            id: id,
-                                                            accountId: accountIds[0]
-                                                        };
-                                                        const _res = await postRequest(env.SERVER_URL + "/api/marketplace/unset_favourites", _postData);
-                                                        if (!_res) {
-                                                            toast.error("Something wrong with server!");
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        if (!_res.result) {
-                                                            toast.error(_res.error);
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        setIsFavourites(false);
-                                                        setFavourites(_res.data.favourites);
-                                                        setLoadingView(false);
-                                                    }
-                                                }}
-                                            />
-                                        }
-                                        <p style={{
-                                            margin: '0',
-                                            fontWeight: '500',
-                                        }}>
-                                            {favourites} favourites
-                                        </p>
-                                    </div>
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                    }}>
-                                        {
-                                            isWatching == false &&
-                                            <RemoveRedEyeOutlined fontSize='large'
-                                                sx={{
-                                                    display: 'block',
-                                                    verticalAlign: 'middle',
-                                                    marginRight: '0.5rem',
-                                                    height: '1.5rem',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={async () => {
-                                                    if (isWatching == false) {
-                                                        setLoadingView(true);
-                                                        const _postData = {
-                                                            id: id,
-                                                            accountId: accountIds[0]
-                                                        };
-                                                        const _res = await postRequest(env.SERVER_URL + "/api/marketplace/set_watching", _postData);
-                                                        if (!_res) {
-                                                            toast.error("Something wrong with server!");
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        if (!_res.result) {
-                                                            toast.error(_res.error);
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        setIsWatching(true);
-                                                        setWatching(_res.data.watching);
-                                                        setLoadingView(false);
-                                                    }
-                                                }}
-                                            />
-                                        }
-                                        {
-                                            isWatching == true &&
-                                            <RemoveRedEyeOutlined fontSize='large'
-                                                sx={{
-                                                    display: 'block',
-                                                    verticalAlign: 'middle',
-                                                    marginRight: '0.5rem',
-                                                    height: '1.5rem',
-                                                    color: 'red',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={async () => {
-                                                    if (isWatching == true) {
-                                                        setLoadingView(true);
-                                                        const _postData = {
-                                                            id: id,
-                                                            accountId: accountIds[0]
-                                                        };
-                                                        const _res = await postRequest(env.SERVER_URL + "/api/marketplace/unset_watching", _postData);
-                                                        if (!_res) {
-                                                            toast.error("Something wrong with server!");
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        if (!_res.result) {
-                                                            toast.error(_res.error);
-                                                            setLoadingView(false);
-                                                            return;
-                                                        }
-                                                        setIsWatching(false);
-                                                        setWatching(_res.data.watching);
-                                                        setLoadingView(false);
-                                                    }
-                                                }}
-                                            />
-                                        }
-                                        <p style={{
-                                            margin: '0',
-                                            fontWeight: '500',
-                                        }}>
-                                            {watching} watching
-                                        </p>
-                                    </div>
-                                </div>
-                                {/* 3 part */}
-                                <div style={{
-                                    padding: '0.75rem',
-                                    borderRadius: '0.75rem',
-                                    backgroundColor: 'darkseagreen',
-                                }}>
-                                    Current Price
-                                    <div style={{
-                                        display: 'flex',
-                                    }}>
-                                        <SellOutlined sx={{
-                                            display: 'block',
-                                            verticalAlign: 'middle',
-                                            width: '1.75rem',
-                                            height: '1.75rem',
-                                            color: 'blue',
+                                        <video style={{
+                                            position: 'absolute',
+                                            borderRadius: '0.375rem',
+                                        }} autoPlay loop>
+                                            <source src={nftInfo.imageUrl} />
+                                        </video>
+                                        <img alt='' src={nftInfo.imageUrl} style={{
+                                            borderRadius: '0.375rem',
                                         }} />
-                                        <p style={{
-                                            margin: 0,
-                                            fontSize: '1.25rem',
-                                            fontWeight: '600',
-                                            lineHeight: '1.75rem',
-                                            paddingLeft: '0.5rem',
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    {/* 1 part */}
+                                    <h1 style={{
+                                        letterSpacing: '-.025em',
+                                        fontWeight: '800',
+                                        fontSize: '1.875rem',
+                                        lineHeight: '2.25rem',
+                                        textTransform: 'none',
+                                        margin: '0'
+                                    }}>
+                                        {nftInfo.name}
+                                    </h1>
+                                    <p style={{
+                                        color: 'blue',
+                                        marginTop: '0.25rem',
+                                        fontWeight: '500',
+                                    }}>
+                                        {nftInfo.creator}
+                                    </p>
+                                    {/* 2 part */}
+                                    <div style={{
+                                        display: 'flex',
+                                        color: 'black',
+                                        rowGap: '0.5rem',
+                                        alignItems: 'center',
+                                        flexWrap: 'wrap',
+                                        marginTop: '0.5rem',
+                                        marginBottom: '1rem',
+                                    }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            marginRight: '1.5rem',
                                         }}>
-                                            {itemDetailInfo.price} ℏ
-                                        </p>
+                                            <p style={{
+                                                marginRight: '0.25rem',
+                                                margin: 0,
+                                                fontWeight: '500',
+                                            }}>
+                                                Owned by {itemDetailInfo.owner_playerid}
+                                            </p>
+                                        </div>
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            marginRight: '1.5rem',
+                                        }}>
+                                            {
+                                                isFavourites == false &&
+                                                <FavoriteBorderOutlined fontSize='large'
+                                                    sx={{
+                                                        display: 'block',
+                                                        verticalAlign: 'middle',
+                                                        marginRight: '0.5rem',
+                                                        height: '1.5rem',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                    onClick={async () => {
+                                                        if (isFavourites == false) {
+                                                            setLoadingView(true);
+                                                            const _postData = {
+                                                                id: id,
+                                                                accountId: accountIds[0]
+                                                            };
+                                                            const _res = await postRequest(env.SERVER_URL + "/api/marketplace/set_favourites", _postData);
+                                                            if (!_res) {
+                                                                toast.error("Something wrong with server!");
+                                                                setLoadingView(false);
+                                                                return;
+                                                            }
+                                                            if (!_res.result) {
+                                                                toast.error(_res.error);
+                                                                setLoadingView(false);
+                                                                return;
+                                                            }
+                                                            setIsFavourites(true);
+                                                            setFavourites(_res.data.favourites);
+                                                            setLoadingView(false);
+                                                        }
+                                                    }}
+                                                />
+                                            }
+                                            {
+                                                isFavourites == true &&
+                                                <FavoriteBorderOutlined fontSize='large'
+                                                    sx={{
+                                                        display: 'block',
+                                                        verticalAlign: 'middle',
+                                                        marginRight: '0.5rem',
+                                                        height: '1.5rem',
+                                                        color: 'red',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                    onClick={async () => {
+                                                        if (isFavourites == true) {
+                                                            setLoadingView(true);
+                                                            const _postData = {
+                                                                id: id,
+                                                                accountId: accountIds[0]
+                                                            };
+                                                            const _res = await postRequest(env.SERVER_URL + "/api/marketplace/unset_favourites", _postData);
+                                                            if (!_res) {
+                                                                toast.error("Something wrong with server!");
+                                                                setLoadingView(false);
+                                                                return;
+                                                            }
+                                                            if (!_res.result) {
+                                                                toast.error(_res.error);
+                                                                setLoadingView(false);
+                                                                return;
+                                                            }
+                                                            setIsFavourites(false);
+                                                            setFavourites(_res.data.favourites);
+                                                            setLoadingView(false);
+                                                        }
+                                                    }}
+                                                />
+                                            }
+                                            <p style={{
+                                                margin: '0',
+                                                fontWeight: '500',
+                                            }}>
+                                                {favourites} favourites
+                                            </p>
+                                        </div>
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                        }}>
+                                            {
+                                                isWatching == false &&
+                                                <RemoveRedEyeOutlined fontSize='large'
+                                                    sx={{
+                                                        display: 'block',
+                                                        verticalAlign: 'middle',
+                                                        marginRight: '0.5rem',
+                                                        height: '1.5rem',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                    onClick={async () => {
+                                                        if (isWatching == false) {
+                                                            setLoadingView(true);
+                                                            const _postData = {
+                                                                id: id,
+                                                                accountId: accountIds[0]
+                                                            };
+                                                            const _res = await postRequest(env.SERVER_URL + "/api/marketplace/set_watching", _postData);
+                                                            if (!_res) {
+                                                                toast.error("Something wrong with server!");
+                                                                setLoadingView(false);
+                                                                return;
+                                                            }
+                                                            if (!_res.result) {
+                                                                toast.error(_res.error);
+                                                                setLoadingView(false);
+                                                                return;
+                                                            }
+                                                            setIsWatching(true);
+                                                            setWatching(_res.data.watching);
+                                                            setLoadingView(false);
+                                                        }
+                                                    }}
+                                                />
+                                            }
+                                            {
+                                                isWatching == true &&
+                                                <RemoveRedEyeOutlined fontSize='large'
+                                                    sx={{
+                                                        display: 'block',
+                                                        verticalAlign: 'middle',
+                                                        marginRight: '0.5rem',
+                                                        height: '1.5rem',
+                                                        color: 'red',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                    onClick={async () => {
+                                                        if (isWatching == true) {
+                                                            setLoadingView(true);
+                                                            const _postData = {
+                                                                id: id,
+                                                                accountId: accountIds[0]
+                                                            };
+                                                            const _res = await postRequest(env.SERVER_URL + "/api/marketplace/unset_watching", _postData);
+                                                            if (!_res) {
+                                                                toast.error("Something wrong with server!");
+                                                                setLoadingView(false);
+                                                                return;
+                                                            }
+                                                            if (!_res.result) {
+                                                                toast.error(_res.error);
+                                                                setLoadingView(false);
+                                                                return;
+                                                            }
+                                                            setIsWatching(false);
+                                                            setWatching(_res.data.watching);
+                                                            setLoadingView(false);
+                                                        }
+                                                    }}
+                                                />
+                                            }
+                                            <p style={{
+                                                margin: '0',
+                                                fontWeight: '500',
+                                            }}>
+                                                {watching} watching
+                                            </p>
+                                        </div>
                                     </div>
-                                    {
-                                        accountIds[0] == itemDetailInfo.owner_accountid &&
+                                    {/* 3 part */}
+                                    <div style={{
+                                        padding: '0.75rem',
+                                        borderRadius: '0.75rem',
+                                        backgroundColor: 'darkseagreen',
+                                    }}>
+                                        Current Price
                                         <div style={{
                                             display: 'flex',
-                                            paddingBottom: '0.75rem',
-                                            marginTop: '0.75rem',
                                         }}>
-                                            <Button onClick={async () => {
-                                                setLoadingView(true);
-                                                const _res = await deleteAllowanceNft(itemDetailInfo.token_id, itemDetailInfo.serial_number);
-                                                if (!_res) {
-                                                    toast.error("Error! The transaction was rejected, or failed!");
-                                                    setLoadingView(false);
-                                                    return;
-                                                }
-
-                                                // cancel listing
-                                                const _postData = {
-                                                    token_id: itemDetailInfo.token_id,
-                                                    serial_number: itemDetailInfo.serial_number
-                                                };
-
-                                                const _cancelListingRes = await postRequest(env.SERVER_URL + "/api/marketplace/cancel_list", _postData);
-                                                if (!_cancelListingRes) {
-                                                    toast.error("Something wrong with server!");
-                                                    setLoadingView(false);
-                                                    return;
-                                                }
-                                                if (!_cancelListingRes.result) {
-                                                    toast.error(_cancelListingRes.error);
-                                                    setLoadingView(false);
-                                                    return;
-                                                }
-                                                setLoadingView(false);
-                                                history.push('/marketplace');
-                                            }}
-                                                variant='outlined'
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'cetner',
-                                                    justifyContent: 'center',
-                                                    flex: '1 1 0%',
-                                                    maxWidth: '20rem',
-                                                    padding: '2rem, 0.5rem',
-                                                    marginRight: '1rem',
-                                                    borderRadius: '21px',
-                                                    textTransform: 'none',
-                                                    fontSize: 16,
-                                                    fontWeight: 700,
-                                                    color: 'white',
-                                                    backgroundColor: 'blueviolet',
-                                                    '&:focus': {
-                                                        outline: 'none',
-                                                        boxShadow: 'none',
-                                                    }
-                                                }}>
-                                                Cancel Listing
-                                            </Button>
+                                            <SellOutlined sx={{
+                                                display: 'block',
+                                                verticalAlign: 'middle',
+                                                width: '1.75rem',
+                                                height: '1.75rem',
+                                                color: 'blue',
+                                            }} />
+                                            <p style={{
+                                                margin: 0,
+                                                fontSize: '1.25rem',
+                                                fontWeight: '600',
+                                                lineHeight: '1.75rem',
+                                                paddingLeft: '0.5rem',
+                                            }}>
+                                                {itemDetailInfo.price} ℏ
+                                            </p>
                                         </div>
-                                    }
-                                    {
-                                        accountIds[0] != itemDetailInfo.owner_accountid &&
-                                        <div style={{
-                                            display: 'flex',
-                                            paddingBottom: '0.75rem',
-                                            marginTop: '0.75rem',
-                                        }}>
-                                            <Button onClick={async () => {
-
-                                            }}
-                                                variant='outlined'
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'cetner',
-                                                    justifyContent: 'center',
-                                                    flex: '1 1 0%',
-                                                    maxWidth: '20rem',
-                                                    padding: '2rem, 0.5rem',
-                                                    marginRight: '1rem',
-                                                    borderRadius: '21px',
-                                                    textTransform: 'none',
-                                                    fontSize: 16,
-                                                    fontWeight: 700,
-                                                    color: 'blueviolet',
-                                                    border: '1px solid #e74895',
-                                                    '&:hover': {
-                                                        backgroundColor: 'blueviolet',
-                                                        border: '2px solid blueviolet',
-                                                        color: 'white',
-                                                        boxShadow: 'none',
-                                                    },
-                                                    '&:focus': {
-                                                        outline: 'none',
-                                                        boxShadow: 'none',
-                                                    }
-                                                }}>
-                                                Associate Token
-                                            </Button>
-                                            <Button onClick={async () => {
-                                                setLoadingView(true);
-
-                                                const _res = await buyNFT(itemDetailInfo.owner_accountid, itemDetailInfo.price);
-                                                if (!_res) {
-                                                    toast.error("Error! The transaction was rejected, or failed! Please try again!");
-                                                    setLoadingView(false);
-                                                    return;
-                                                }
-
-                                                // set allowance buyer
-                                                const _nftInfo = {
-                                                    token_id: btoa(itemDetailInfo.token_id),
-                                                    serial_number: btoa(itemDetailInfo.serial_number)
-                                                };
-
-                                                const _postData = {
-                                                    a: _nftInfo,
-                                                    b: btoa(itemDetailInfo.owner_accountid),
-                                                    c: btoa(accountIds[0]),
-                                                    d: btoa(itemDetailInfo.price)
-                                                };
-                                                const _sendNftRes = await postRequest(env.SERVER_URL + "/api/marketplace/send_nft", _postData);
-                                                if (!_sendNftRes) {
-                                                    toast.error("Something wrong with server!");
-                                                    setLoadingView(false);
-                                                    return;
-                                                }
-                                                if (!_sendNftRes.result) {
-                                                    toast.error(_sendNftRes.error);
-                                                    setLoadingView(false);
-                                                    return;
-                                                }
-                                                toast.success(_sendNftRes.data);
-                                                setLoadingView(false);
-                                                setBuySuccessfulViewFlag(true);
-                                            }}
-                                                variant='outlined'
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'cetner',
-                                                    justifyContent: 'center',
-                                                    flex: '1 1 0%',
-                                                    maxWidth: '20rem',
-                                                    padding: '2rem, 0.5rem',
-                                                    marginRight: '1rem',
-                                                    borderRadius: '21px',
-                                                    textTransform: 'none',
-                                                    fontSize: 16,
-                                                    fontWeight: 700,
-                                                    color: 'white',
-                                                    backgroundColor: 'blueviolet',
-                                                    '&:focus': {
-                                                        outline: 'none',
-                                                        boxShadow: 'none',
-                                                    }
-                                                }}>
-                                                Buy this NFT
-                                            </Button>
-                                        </div>
-                                    }
-                                </div>
-                                {/* 4 part */}
-                                <div style={{
-                                    padding: '0.75rem',
-                                    marginTop: '0.5rem',
-                                    borderRadius: '0.75rem',
-                                    backgroundColor: 'darkseagreen',
-                                    fontWeight: '600',
-                                }}>
-                                    First make sure the HashPack Chrome extension is open and unlocked. To list your NFT input the amount of HBAR you would like to sell it for (mininum 2 HBAR). Click "List this NFT". A transaction will be sent to your HashPack wallet, which needs to be approved.
-                                </div>
-                                {/* 3 part */}
-                                <Box sx={{
-                                    marginTop: '1rem'
-                                }}>
-                                    {/* About collection */}
-                                    <Box>
-                                        <button style={{
-                                            display: 'flex',
-                                            height: '46px',
-                                            position: 'relative',
-                                            textAlign: 'left',
-                                            paddingTop: '0.5rem',
-                                            paddingBottom: '0.5rem',
-                                            borderWidth: '1px',
-                                            borderRadius: '0.5rem',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            width: '100%',
-                                            padding: '0',
-                                            lineHeight: 'inherit',
-                                            color: 'inherit',
-                                            backgroundColor: 'transparent',
-                                            backgroundImage: 'none',
-                                            fontFamily: 'inherit',
-                                            fontSize: '100%',
-                                            margin: '0'
-                                        }}>
+                                        {
+                                            accountIds[0] == itemDetailInfo.owner_accountid &&
                                             <div style={{
                                                 display: 'flex',
-                                                paddingLeft: '1rem',
-                                                justifyContent: 'center',
-                                                alignItems: 'center'
+                                                paddingBottom: '0.75rem',
+                                                marginTop: '0.75rem',
                                             }}>
-                                                <PersonOutline sx={{
-                                                    display: 'block',
-                                                    color: 'blue',
-                                                    verticalAlign: 'middle',
-                                                    width: '1.75rem',
-                                                    height: '1.75rem',
-                                                    marginRight: '0.5rem'
-                                                }} />
-                                                <span style={{
-                                                    fontWeight: '700',
-                                                    verticalAlign: 'middle'
-                                                }}>
-                                                    About {nftInfo.creator}
-                                                </span>
-                                            </div>
-                                            <span style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                marginLeft: '1.5rem',
-                                                marginRight: '0.5rem'
-                                            }}>
-                                                {/* <Add sx={{
-                                                    display: 'block',
-                                                    width: '1.75rem',
-                                                    height: '1.75rem',
-                                                    verticalAlign: 'middle',
-                                                    color: 'gray'
-                                                }} /> */}
-                                            </span>
-                                        </button>
-                                        <div style={{
-                                            paddingTop: '0.5rem',
-                                            paddingBottom: '0.5rem',
-                                            paddingLeft: '1.5rem',
-                                            paddingRight: '1.5rem',
-                                            backgroundColor: 'darksalmon',
-                                            borderWidth: '1px',
-                                            borderRadius: '0.5rem',
-                                            marginTop: '0.5rem',
-                                            marginBottom: '0.5rem',
-                                            fontWeight: '600',
-                                        }}>
-                                            {nftInfo.description}
-                                        </div>
-                                    </Box>
-                                    {/* About Attributes */}
-                                    <Box>
-                                        <button style={{
-                                            display: 'flex',
-                                            height: '46px',
-                                            position: 'relative',
-                                            textAlign: 'left',
-                                            paddingTop: '0.5rem',
-                                            paddingBottom: '0.5rem',
-                                            borderWidth: '1px',
-                                            borderRadius: '0.5rem',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            width: '100%',
-                                            padding: '0',
-                                            lineHeight: 'inherit',
-                                            color: 'inherit',
-                                            backgroundColor: 'transparent',
-                                            backgroundImage: 'none',
-                                            fontFamily: 'inherit',
-                                            fontSize: '100%',
-                                            margin: '0'
-                                        }}>
-                                            <div style={{
-                                                display: 'flex',
-                                                paddingLeft: '1rem',
-                                                justifyContent: 'center',
-                                                alignItems: 'center'
-                                            }}>
-                                                <EventNoteOutlined sx={{
-                                                    display: 'block',
-                                                    color: 'blue',
-                                                    verticalAlign: 'middle',
-                                                    width: '1.75rem',
-                                                    height: '1.75rem',
-                                                    marginRight: '0.5rem'
-                                                }} />
-                                                <span style={{
-                                                    fontWeight: '700',
-                                                    verticalAlign: 'middle'
-                                                }}>
-                                                    Attributes
-                                                </span>
-                                            </div>
-                                            <span style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                marginLeft: '1.5rem',
-                                                marginRight: '0.5rem'
-                                            }}>
-                                                {/* <Add sx={{
-                                                    display: 'block',
-                                                    width: '1.75rem',
-                                                    height: '1.75rem',
-                                                    verticalAlign: 'middle',
-                                                    color: 'gray'
-                                                }} /> */}
-                                            </span>
-                                        </button>
-                                        <div style={{
-                                            display: 'grid',
-                                            gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
-                                            paddingTop: '0.25rem',
-                                            paddingBottom: '0.25rem',
-                                            paddingLeft: '0.5rem',
-                                            paddingRight: '0.5rem',
-                                            backgroundColor: 'darksalmon',
-                                            borderWidth: '1px',
-                                            borderRadius: '0.5rem',
-                                            marginTop: '0.5rem',
-                                            marginBottom: '0.5rem'
-                                        }}>
-                                            {
-                                                nftInfo.attributes.map((item, index) => {
-                                                    return <div key={index} style={{
-                                                        padding: '0.75rem',
-                                                        backgroundColor: 'black',
-                                                        borderRadius: '0.5rem',
-                                                        margin: '0.25rem'
-                                                    }}>
-                                                        <div style={{
-                                                            lineHeight: '1rem',
-                                                            marginBottom: '0.25rem',
-                                                            color: 'darkgray'
-                                                        }}>
-                                                            {item.trait_type}
-                                                        </div>
-                                                        <div style={{
-                                                            display: 'flex',
-                                                            flexWrap: 'wrap',
-                                                            rowGap: '0.25rem',
-                                                            columnGap: '1rem',
-                                                            color: 'whitesmoke'
-                                                        }}>
-                                                            {item.value}
-                                                        </div>
-                                                    </div>
-                                                })
-                                            }
-                                        </div>
-                                    </Box>
-                                    {/* About Details */}
-                                    <Box>
-                                        <button style={{
-                                            display: 'flex',
-                                            height: '46px',
-                                            position: 'relative',
-                                            textAlign: 'left',
-                                            paddingTop: '0.5rem',
-                                            paddingBottom: '0.5rem',
-                                            borderWidth: '1px',
-                                            borderRadius: '0.5rem',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            width: '100%',
-                                            padding: '0',
-                                            lineHeight: 'inherit',
-                                            color: 'inherit',
-                                            backgroundColor: 'transparent',
-                                            backgroundImage: 'none',
-                                            fontFamily: 'inherit',
-                                            fontSize: '100%',
-                                            margin: '0'
-                                        }}>
-                                            <div style={{
-                                                display: 'flex',
-                                                paddingLeft: '1rem',
-                                                justifyContent: 'center',
-                                                alignItems: 'center'
-                                            }}>
-                                                <EventNoteOutlined sx={{
-                                                    display: 'block',
-                                                    color: 'blue',
-                                                    verticalAlign: 'middle',
-                                                    width: '1.75rem',
-                                                    height: '1.75rem',
-                                                    marginRight: '0.5rem'
-                                                }} />
-                                                <span style={{
-                                                    fontWeight: '700',
-                                                    verticalAlign: 'middle'
-                                                }}>
-                                                    Details
-                                                </span>
-                                            </div>
-                                            <span style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                marginLeft: '1.5rem',
-                                                marginRight: '0.5rem'
-                                            }}>
-                                                {/* <Add sx={{
-                                                    display: 'block',
-                                                    width: '1.75rem',
-                                                    height: '1.75rem',
-                                                    verticalAlign: 'middle',
-                                                    color: 'gray'
-                                                }} /> */}
-                                            </span>
-                                        </button>
-                                        <div style={{
-                                            paddingTop: '0.5rem',
-                                            paddingBottom: '0.5rem',
-                                            paddingLeft: '1.5rem',
-                                            paddingRight: '1.5rem',
-                                            backgroundColor: 'darksalmon',
-                                            borderWidth: '1px',
-                                            borderRadius: '0.5rem',
-                                            marginTop: '0.5rem',
-                                            marginBottom: '0.5rem'
-                                        }}>
-                                            {
-                                                nftDetailInfo &&
-                                                nftDetailInfo.map((item, index) => {
-                                                    return <div key={index} style={{
+                                                <Button onClick={async () => {
+                                                    setLoadingView(true);
+                                                    const _res = await deleteAllowanceNft(itemDetailInfo.token_id, itemDetailInfo.serial_number);
+                                                    if (!_res) {
+                                                        toast.error("Error! The transaction was rejected, or failed!");
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+
+                                                    // cancel listing
+                                                    const _postData = {
+                                                        token_id: itemDetailInfo.token_id,
+                                                        serial_number: itemDetailInfo.serial_number
+                                                    };
+
+                                                    const _cancelListingRes = await postRequest(env.SERVER_URL + "/api/marketplace/cancel_list", _postData);
+                                                    if (!_cancelListingRes) {
+                                                        toast.error("Something wrong with server!");
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+                                                    if (!_cancelListingRes.result) {
+                                                        toast.error(_cancelListingRes.error);
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+                                                    setLoadingView(false);
+                                                    history.push('/marketplace');
+                                                }}
+                                                    variant='outlined'
+                                                    sx={{
                                                         display: 'flex',
-                                                        position: 'relative',
-                                                        textAlign: 'left',
-                                                        paddingTop: '0.25rem',
-                                                        paddingBottom: '0.25rem',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center',
-                                                        width: '100%'
+                                                        alignItems: 'cetner',
+                                                        justifyContent: 'center',
+                                                        flex: '1 1 0%',
+                                                        maxWidth: '20rem',
+                                                        padding: '2rem, 0.5rem',
+                                                        marginRight: '1rem',
+                                                        borderRadius: '21px',
+                                                        textTransform: 'none',
+                                                        fontSize: 16,
+                                                        fontWeight: 700,
+                                                        color: 'white',
+                                                        backgroundColor: 'blueviolet',
+                                                        '&:focus': {
+                                                            outline: 'none',
+                                                            boxShadow: 'none',
+                                                        }
                                                     }}>
-                                                        <div style={{
+                                                    Cancel Listing
+                                                </Button>
+                                            </div>
+                                        }
+                                        {
+                                            accountIds[0] != itemDetailInfo.owner_accountid &&
+                                            <div style={{
+                                                display: 'flex',
+                                                paddingBottom: '0.75rem',
+                                                marginTop: '0.75rem',
+                                            }}>
+                                                <Button onClick={async () => {
+
+                                                }}
+                                                    variant='outlined'
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'cetner',
+                                                        justifyContent: 'center',
+                                                        flex: '1 1 0%',
+                                                        maxWidth: '20rem',
+                                                        padding: '2rem, 0.5rem',
+                                                        marginRight: '1rem',
+                                                        borderRadius: '21px',
+                                                        textTransform: 'none',
+                                                        fontSize: 16,
+                                                        fontWeight: 700,
+                                                        color: 'blueviolet',
+                                                        border: '1px solid #e74895',
+                                                        '&:hover': {
+                                                            backgroundColor: 'blueviolet',
+                                                            border: '2px solid blueviolet',
+                                                            color: 'white',
+                                                            boxShadow: 'none',
+                                                        },
+                                                        '&:focus': {
+                                                            outline: 'none',
+                                                            boxShadow: 'none',
+                                                        }
+                                                    }}>
+                                                    Associate Token
+                                                </Button>
+                                                <Button onClick={async () => {
+                                                    setLoadingView(true);
+
+                                                    const _res = await buyNFT(itemDetailInfo.owner_accountid, itemDetailInfo.price);
+                                                    if (!_res) {
+                                                        toast.error("Error! The transaction was rejected, or failed! Please try again!");
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+
+                                                    // set allowance buyer
+                                                    const _nftInfo = {
+                                                        token_id: btoa(itemDetailInfo.token_id),
+                                                        serial_number: btoa(itemDetailInfo.serial_number)
+                                                    };
+
+                                                    const _postData = {
+                                                        a: _nftInfo,
+                                                        b: btoa(itemDetailInfo.owner_accountid),
+                                                        c: btoa(accountIds[0]),
+                                                        d: btoa(itemDetailInfo.price)
+                                                    };
+                                                    const _sendNftRes = await postRequest(env.SERVER_URL + "/api/marketplace/send_nft", _postData);
+                                                    if (!_sendNftRes) {
+                                                        toast.error("Something wrong with server!");
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+                                                    if (!_sendNftRes.result) {
+                                                        toast.error(_sendNftRes.error);
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+                                                    toast.success(_sendNftRes.data);
+                                                    setLoadingView(false);
+                                                    setBuySuccessfulViewFlag(true);
+                                                }}
+                                                    variant='outlined'
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'cetner',
+                                                        justifyContent: 'center',
+                                                        flex: '1 1 0%',
+                                                        maxWidth: '20rem',
+                                                        padding: '2rem, 0.5rem',
+                                                        marginRight: '1rem',
+                                                        borderRadius: '21px',
+                                                        textTransform: 'none',
+                                                        fontSize: 16,
+                                                        fontWeight: 700,
+                                                        color: 'white',
+                                                        backgroundColor: 'blueviolet',
+                                                        '&:focus': {
+                                                            outline: 'none',
+                                                            boxShadow: 'none',
+                                                        }
+                                                    }}>
+                                                    Buy this NFT
+                                                </Button>
+                                                {/*
+                                                    <Button onClick={setOfferDialogViewFlag(true)}
+                                                        variant='outlined'
+                                                        sx={{
                                                             display: 'flex',
-                                                            fontWeight: '600',
+                                                            alignItems: 'cetner',
                                                             justifyContent: 'center',
-                                                            alignItems: 'center'
+                                                            flex: '1 1 0%',
+                                                            maxWidth: '20rem',
+                                                            padding: '2rem, 0.5rem',
+                                                            marginRight: '1rem',
+                                                            borderRadius: '21px',
+                                                            textTransform: 'none',
+                                                            fontSize: 16,
+                                                            fontWeight: 700,
+                                                            color: 'blueviolet',
+                                                            border: '1px solid #e74895',
+                                                            '&:hover': {
+                                                                backgroundColor: 'blueviolet',
+                                                                border: '2px solid blueviolet',
+                                                                color: 'white',
+                                                                boxShadow: 'none',
+                                                            },
+                                                            '&:focus': {
+                                                                outline: 'none',
+                                                                boxShadow: 'none',
+                                                            }
                                                         }}>
-                                                            {item.name}
+                                                        Make offer
+                                                    </Button>
+                                                    */}
+                                            </div>
+                                        }
+                                    </div>
+                                    {/* 4 part */}
+                                    <div style={{
+                                        padding: '0.75rem',
+                                        marginTop: '0.5rem',
+                                        borderRadius: '0.75rem',
+                                        backgroundColor: 'darkseagreen',
+                                        fontWeight: '600',
+                                    }}>
+                                        First make sure the HashPack Chrome extension is open and unlocked. To list your NFT input the amount of HBAR you would like to sell it for (mininum 2 HBAR). Click "List this NFT". A transaction will be sent to your HashPack wallet, which needs to be approved.
+                                    </div>
+                                    {/* 3 part */}
+                                    <Box sx={{
+                                        marginTop: '1rem'
+                                    }}>
+                                        {/* About collection */}
+                                        <Box>
+                                            <button style={{
+                                                display: 'flex',
+                                                height: '46px',
+                                                position: 'relative',
+                                                textAlign: 'left',
+                                                paddingTop: '0.5rem',
+                                                paddingBottom: '0.5rem',
+                                                borderWidth: '1px',
+                                                borderRadius: '0.5rem',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                width: '100%',
+                                                padding: '0',
+                                                lineHeight: 'inherit',
+                                                color: 'inherit',
+                                                backgroundColor: 'transparent',
+                                                backgroundImage: 'none',
+                                                fontFamily: 'inherit',
+                                                fontSize: '100%',
+                                                margin: '0'
+                                            }}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    paddingLeft: '1rem',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center'
+                                                }}>
+                                                    <PersonOutline sx={{
+                                                        display: 'block',
+                                                        color: 'blue',
+                                                        verticalAlign: 'middle',
+                                                        width: '1.75rem',
+                                                        height: '1.75rem',
+                                                        marginRight: '0.5rem'
+                                                    }} />
+                                                    <span style={{
+                                                        fontWeight: '700',
+                                                        verticalAlign: 'middle'
+                                                    }}>
+                                                        About {nftInfo.creator}
+                                                    </span>
+                                                </div>
+                                                <span style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    marginLeft: '1.5rem',
+                                                    marginRight: '0.5rem'
+                                                }}>
+                                                    {/* <Add sx={{
+                                                        display: 'block',
+                                                        width: '1.75rem',
+                                                        height: '1.75rem',
+                                                        verticalAlign: 'middle',
+                                                        color: 'gray'
+                                                    }} /> */}
+                                                </span>
+                                            </button>
+                                            <div style={{
+                                                paddingTop: '0.5rem',
+                                                paddingBottom: '0.5rem',
+                                                paddingLeft: '1.5rem',
+                                                paddingRight: '1.5rem',
+                                                backgroundColor: 'darksalmon',
+                                                borderWidth: '1px',
+                                                borderRadius: '0.5rem',
+                                                marginTop: '0.5rem',
+                                                marginBottom: '0.5rem',
+                                                fontWeight: '600',
+                                            }}>
+                                                {nftInfo.description}
+                                            </div>
+                                        </Box>
+                                        {/* About Attributes */}
+                                        <Box>
+                                            <button style={{
+                                                display: 'flex',
+                                                height: '46px',
+                                                position: 'relative',
+                                                textAlign: 'left',
+                                                paddingTop: '0.5rem',
+                                                paddingBottom: '0.5rem',
+                                                borderWidth: '1px',
+                                                borderRadius: '0.5rem',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                width: '100%',
+                                                padding: '0',
+                                                lineHeight: 'inherit',
+                                                color: 'inherit',
+                                                backgroundColor: 'transparent',
+                                                backgroundImage: 'none',
+                                                fontFamily: 'inherit',
+                                                fontSize: '100%',
+                                                margin: '0'
+                                            }}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    paddingLeft: '1rem',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center'
+                                                }}>
+                                                    <EventNoteOutlined sx={{
+                                                        display: 'block',
+                                                        color: 'blue',
+                                                        verticalAlign: 'middle',
+                                                        width: '1.75rem',
+                                                        height: '1.75rem',
+                                                        marginRight: '0.5rem'
+                                                    }} />
+                                                    <span style={{
+                                                        fontWeight: '700',
+                                                        verticalAlign: 'middle'
+                                                    }}>
+                                                        Attributes
+                                                    </span>
+                                                </div>
+                                                <span style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    marginLeft: '1.5rem',
+                                                    marginRight: '0.5rem'
+                                                }}>
+                                                    {/* <Add sx={{
+                                                        display: 'block',
+                                                        width: '1.75rem',
+                                                        height: '1.75rem',
+                                                        verticalAlign: 'middle',
+                                                        color: 'gray'
+                                                    }} /> */}
+                                                </span>
+                                            </button>
+                                            <div style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
+                                                paddingTop: '0.25rem',
+                                                paddingBottom: '0.25rem',
+                                                paddingLeft: '0.5rem',
+                                                paddingRight: '0.5rem',
+                                                backgroundColor: 'darksalmon',
+                                                borderWidth: '1px',
+                                                borderRadius: '0.5rem',
+                                                marginTop: '0.5rem',
+                                                marginBottom: '0.5rem'
+                                            }}>
+                                                {
+                                                    nftInfo.attributes.map((item, index) => {
+                                                        return <div key={index} style={{
+                                                            padding: '0.75rem',
+                                                            backgroundColor: 'black',
+                                                            borderRadius: '0.5rem',
+                                                            margin: '0.25rem'
+                                                        }}>
+                                                            <div style={{
+                                                                lineHeight: '1rem',
+                                                                marginBottom: '0.25rem',
+                                                                color: 'darkgray'
+                                                            }}>
+                                                                {item.trait_type}
+                                                            </div>
+                                                            <div style={{
+                                                                display: 'flex',
+                                                                flexWrap: 'wrap',
+                                                                rowGap: '0.25rem',
+                                                                columnGap: '1rem',
+                                                                color: 'whitesmoke'
+                                                            }}>
+                                                                {item.value}
+                                                            </div>
                                                         </div>
-                                                        <span style={{
+                                                    })
+                                                }
+                                            </div>
+                                        </Box>
+                                        {/* About Details */}
+                                        <Box>
+                                            <button style={{
+                                                display: 'flex',
+                                                height: '46px',
+                                                position: 'relative',
+                                                textAlign: 'left',
+                                                paddingTop: '0.5rem',
+                                                paddingBottom: '0.5rem',
+                                                borderWidth: '1px',
+                                                borderRadius: '0.5rem',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                width: '100%',
+                                                padding: '0',
+                                                lineHeight: 'inherit',
+                                                color: 'inherit',
+                                                backgroundColor: 'transparent',
+                                                backgroundImage: 'none',
+                                                fontFamily: 'inherit',
+                                                fontSize: '100%',
+                                                margin: '0'
+                                            }}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    paddingLeft: '1rem',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center'
+                                                }}>
+                                                    <EventNoteOutlined sx={{
+                                                        display: 'block',
+                                                        color: 'blue',
+                                                        verticalAlign: 'middle',
+                                                        width: '1.75rem',
+                                                        height: '1.75rem',
+                                                        marginRight: '0.5rem'
+                                                    }} />
+                                                    <span style={{
+                                                        fontWeight: '700',
+                                                        verticalAlign: 'middle'
+                                                    }}>
+                                                        Details
+                                                    </span>
+                                                </div>
+                                                <span style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    marginLeft: '1.5rem',
+                                                    marginRight: '0.5rem'
+                                                }}>
+                                                    {/* <Add sx={{
+                                                        display: 'block',
+                                                        width: '1.75rem',
+                                                        height: '1.75rem',
+                                                        verticalAlign: 'middle',
+                                                        color: 'gray'
+                                                    }} /> */}
+                                                </span>
+                                            </button>
+                                            <div style={{
+                                                paddingTop: '0.5rem',
+                                                paddingBottom: '0.5rem',
+                                                paddingLeft: '1.5rem',
+                                                paddingRight: '1.5rem',
+                                                backgroundColor: 'darksalmon',
+                                                borderWidth: '1px',
+                                                borderRadius: '0.5rem',
+                                                marginTop: '0.5rem',
+                                                marginBottom: '0.5rem'
+                                            }}>
+                                                {
+                                                    nftDetailInfo &&
+                                                    nftDetailInfo.map((item, index) => {
+                                                        return <div key={index} style={{
                                                             display: 'flex',
+                                                            position: 'relative',
+                                                            textAlign: 'left',
+                                                            paddingTop: '0.25rem',
+                                                            paddingBottom: '0.25rem',
+                                                            justifyContent: 'space-between',
                                                             alignItems: 'center',
-                                                            marginLeft: '1.5rem',
-                                                            color: 'unset',
-                                                            fontWeight: '600',
+                                                            width: '100%'
                                                         }}>
-                                                            {item.value}
-                                                        </span>
-                                                    </div>
-                                                })
-                                            }
-                                        </div>
+                                                            <div style={{
+                                                                display: 'flex',
+                                                                fontWeight: '600',
+                                                                justifyContent: 'center',
+                                                                alignItems: 'center'
+                                                            }}>
+                                                                {item.name}
+                                                            </div>
+                                                            <span style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                marginLeft: '1.5rem',
+                                                                color: 'unset',
+                                                                fontWeight: '600',
+                                                            }}>
+                                                                {item.value}
+                                                            </span>
+                                                        </div>
+                                                    })
+                                                }
+                                            </div>
+                                        </Box>
                                     </Box>
-                                </Box>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </Paper>
-                </Box>
-            }
+                        </Paper>
+                    </Box>
+                }
+            </div>
             {
                 nftInfo &&
                 <Dialog

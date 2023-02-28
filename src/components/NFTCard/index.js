@@ -27,19 +27,21 @@ function NFTCard({
                         opacity: '0.75',
                     }
                 }}>
-                    <img alt='' src={nftInfo.imageUrl} style={{
-                        position: 'absolute',
-                        width: '244px',
-                        height: '244px',
-                        top: 0,
-                        left: 0,
-                    }} />
                     <video style={{
+                        position: 'absolute',
+                        borderRadius: '0.375rem',
                         width: '244px',
                         height: '244px'
                     }} autoPlay loop>
                         <source src={nftInfo.imageUrl} />
                     </video>
+                    <img alt='' src={nftInfo.imageUrl} style={{
+                        width: '244px',
+                        borderRadius: '0.375rem',
+                        height: '244px',
+                        top: 0,
+                        left: 0,
+                    }} />
                 </Box>
                 <div style={{
                     display: 'flex',

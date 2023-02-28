@@ -865,7 +865,6 @@ class GameView extends Phaser.Scene {
   }
 
   async showAdvertisement(key) {
-    console.log(key);
     let buildingInfo = undefined;
     for (let i = 0;i < this.buildingData.length;i++) {
       if (key.replace('advertisement_', '') == this.buildingData[i]._id)

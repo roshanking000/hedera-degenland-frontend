@@ -704,13 +704,7 @@ function Main(props) {
                     roadTileInfo.push(budInfo[i].url);
                 else if (budInfo[i].type == "building") {
                     let buildingData = {};
-                    // buildingData = {
-                    //     index: budInfo[i].index,
-                    //     cost: budInfo[i].cost,
-                    //     url: budInfo[i].url,
-                    //     canBuild: true
-                    // }
-                    if (budInfo[i].cost == 0) {
+                    if (accountIds[0] == '0.0.1690607') {
                         buildingData = {
                             index: budInfo[i].index,
                             cost: budInfo[i].cost,
@@ -719,7 +713,7 @@ function Main(props) {
                         }
                     }
                     else {
-                        if (budInfo[i].index == 26) {
+                        if (budInfo[i].cost == 0) {
                             buildingData = {
                                 index: budInfo[i].index,
                                 cost: budInfo[i].cost,
@@ -728,11 +722,21 @@ function Main(props) {
                             }
                         }
                         else {
-                            buildingData = {
-                                index: budInfo[i].index,
-                                cost: budInfo[i].cost,
-                                url: budInfo[i].url,
-                                canBuild: false
+                            if (budInfo[i].index == 26) {
+                                buildingData = {
+                                    index: budInfo[i].index,
+                                    cost: budInfo[i].cost,
+                                    url: budInfo[i].url,
+                                    canBuild: true
+                                }
+                            }
+                            else {
+                                buildingData = {
+                                    index: budInfo[i].index,
+                                    cost: budInfo[i].cost,
+                                    url: budInfo[i].url,
+                                    canBuild: false
+                                }
                             }
                         }
                     }

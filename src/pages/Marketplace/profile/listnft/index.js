@@ -141,15 +141,6 @@ export default function ListNFT() {
         return _utf8Str;
     }
 
-    const DrawerHeader = styled('div')(({ theme }) => ({
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: theme.spacing(0, 1),
-        // necessary for content to be below app bar
-        ...theme.mixins.toolbar,
-    }));
-
     return (
         <Box sx={{ flexGrow: 1 }}>
             <NavBar />
@@ -185,14 +176,15 @@ export default function ListNFT() {
                                         margin: '5px',
                                         maxWidth: '600px',
                                     }}>
-                                    <img alt='' src={nftInfo.imageUrl} style={{
-                                        borderRadius: '0.375rem',
-                                    }} />
                                     <video style={{
+                                        position: 'absolute',
                                         borderRadius: '0.375rem',
                                     }} autoPlay loop>
                                         <source src={nftInfo.imageUrl} />
                                     </video>
+                                    <img alt='' src={nftInfo.imageUrl} style={{
+                                        borderRadius: '0.375rem',
+                                    }} />
                                 </Box>
                             </Grid>
                             <Grid item xs={6}>

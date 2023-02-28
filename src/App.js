@@ -14,6 +14,7 @@ import ItemDetail from "./pages/Marketplace/marketplace/itemdetail";
 import Profile from "./pages/Marketplace/profile";
 import ListNFT from "./pages/Marketplace/profile/listnft";
 import Sold from "./pages/Marketplace/sold";
+import Collections from "./pages/Marketplace/collections";
 
 import store from "./store";
 import { Provider } from 'react-redux';
@@ -29,6 +30,7 @@ function App() {
             <Route path="/main" render={(props) => <Main {...props}/>} />
             <Route path="/marketplace" render={(props) => <Marketplace {...props}/>} />
             <Route path="/item-details/:id" render={(props) => <ItemDetail {...props}/>} />
+            <Route path="/collections" render={(props) => <Collections {...props}/>} />
             <Route path="/profiles" render={(props) => <Profile {...props}/>} />
             <Route path="/profile/:token_id/:serial_number" render={(props) => <ListNFT {...props}/>} />
             <Route path="/sold" render={(props) => <Sold {...props}/>} />
