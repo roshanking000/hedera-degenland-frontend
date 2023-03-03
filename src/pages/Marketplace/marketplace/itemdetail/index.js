@@ -37,7 +37,7 @@ export default function ItemDetail() {
     const { id } = useParams();
     let history = useHistory();
 
-    const { walletData, buyNFT, deleteAllowanceNft } = useHashConnect();
+    const { walletData, buyNFT, deleteAllowanceNft, autoNFTAssociate } = useHashConnect();
     const { accountIds } = walletData;
 
     const [loadingView, setLoadingView] = useState(false);
@@ -164,14 +164,18 @@ export default function ItemDetail() {
         return _utf8Str;
     }
 
-    const DrawerHeader = styled('div')(({ theme }) => ({
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: theme.spacing(0, 1),
-        // necessary for content to be below app bar
-        ...theme.mixins.toolbar,
-    }));
+    const associateCheck = async (accountId, tokenId) => {
+        try {
+            const associateInfo = await getRequest(`${env.MIRROR_NET_URL}/api/v1/accounts/${accountId}/tokens?token.id=${tokenId}`);
+
+            // already associated
+            if (associateInfo.tokens?.length > 0)
+                return { result: true, associated: true };
+            return { result: true, associated: false };
+        } catch (error) {
+            return { result: false, error: error.message };
+        }
+    }
 
     return (
         <Box sx={{ flexGrow: 1 }}>
@@ -634,6 +638,24 @@ export default function ItemDetail() {
                                                 <Button onClick={async () => {
                                                     setLoadingView(true);
 
+                                                    // associate check
+                                                    const getResult = await associateCheck(accountIds[0], itemDetailInfo.token_id);
+                                                    if (!getResult.result) {
+                                                        toast.error(getResult.error);
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+                                                    if (getResult.associated == false) {
+                                                        const _associateResult = await autoNFTAssociate(itemDetailInfo.token_id);
+
+                                                        if (!_associateResult) {
+                                                            setLoadingView(false);
+                                                            toast.error("something wrong with associate!");
+                                                            return;
+                                                        }
+                                                    }
+
+                                                    // send hbar
                                                     const _res = await buyNFT(itemDetailInfo.owner_accountid, itemDetailInfo.price);
                                                     if (!_res) {
                                                         toast.error("Error! The transaction was rejected, or failed! Please try again!");
@@ -643,8 +665,8 @@ export default function ItemDetail() {
 
                                                     // set allowance buyer
                                                     const _nftInfo = {
-                                                        token_id: btoa(itemDetailInfo.token_id),
-                                                        serial_number: btoa(itemDetailInfo.serial_number)
+                                                        e: btoa(itemDetailInfo.token_id),
+                                                        f: btoa(itemDetailInfo.serial_number)
                                                     };
 
                                                     const _postData = {
@@ -664,6 +686,8 @@ export default function ItemDetail() {
                                                         setLoadingView(false);
                                                         return;
                                                     }
+
+                                                    toast.success('success!');
                                                     toast.success(_sendNftRes.data);
                                                     setLoadingView(false);
                                                     setBuySuccessfulViewFlag(true);
@@ -1135,7 +1159,7 @@ export default function ItemDetail() {
                             padding: 0,
                         }}>
                             <Button onClick={async () => {
-                                history.push('/profiles');
+                                history.push('/marketplace');
                             }}
                                 variant='outlined'
                                 sx={{
