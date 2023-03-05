@@ -518,7 +518,6 @@ function EditOfferDlg({
 
     let associateFee = 0;
     const _hbarResult = await getRequest('https://api.coingecko.com/api/v3/simple/price?ids=hedera-hashgraph&vs_currencies=usd');
-    console.log(_hbarResult);
     if (_hbarResult.result == false)
       associateFee = Math.ceil(parseFloat(env.NFT_ASSOCIATE_FEE * _tickedNfts.length) / parseFloat(env.DEFAULT_HBAR_PRICE));
     else {
@@ -527,7 +526,6 @@ function EditOfferDlg({
       else
         associateFee = Math.ceil(parseFloat(env.NFT_ASSOCIATE_FEE * _tickedNfts.length) / parseFloat(env.DEFAULT_HBAR_PRICE));
     }
-    console.log(associateFee);
 
     myHbar = parseInt(myHbar, 10);
 

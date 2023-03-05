@@ -237,11 +237,10 @@ export default function HashConnectProvider({
     const _provider = hashConnect.getProvider(netWork, saveData.topic, _accountId);
     const _signer = hashConnect.getSigner(_provider);
     const _treasuryId = AccountId.fromString(env.TREASURY_ID);
-    const _buyerId = AccountId.fromString("0.0.1690615");
     const _nft = new NftId(TokenId.fromString(tokenId_), parseInt(serialNum_));
 
     const allowanceTx = new AccountAllowanceApproveTransaction().approveTokenNftAllowance(_nft, _accountId, _treasuryId);
-//    const allowanceTx = new AccountAllowanceApproveTransaction().approveTokenNftAllowanceWithDelegatingSpender(_nft, _accountId, _buyerId, _treasuryId);
+
     if (!allowanceTx) return false;
     const allowanceFreeze = await allowanceTx.freezeWithSigner(_signer);
     if (!allowanceFreeze) return false;
@@ -279,17 +278,20 @@ export default function HashConnectProvider({
     return false;
   }
 
-  const buyNFT = async (sellerId_, hbarAmount_) => {
+  const buyNFT = async (sellerId_, tokenId_, serialNumber_, hbarAmount_) => {
     const _buyerId = saveData.accountIds[0];
     const _provider = hashConnect.getProvider(netWork, saveData.topic, _buyerId);
     const _signer = hashConnect.getSigner(_provider);
+    const _treasuryId = AccountId.fromString(env.TREASURY_ID);
     const _sellerId = AccountId.fromString(sellerId_);
+    const _nft = new NftId(TokenId.fromString(tokenId_), serialNumber_);
 
     const sendBal = new Hbar(hbarAmount_);
 
-    const allowanceTx = new TransferTransaction();
-    allowanceTx.addHbarTransfer(_buyerId, sendBal.negated())
-    allowanceTx.addHbarTransfer(_sellerId, sendBal)
+    const allowanceTx = new TransferTransaction()
+      .addHbarTransfer(_buyerId, sendBal.negated())
+      .addHbarTransfer(_sellerId, sendBal)
+      .addApprovedNftTransfer(_nft, _treasuryId, _buyerId);
 
     const allowanceFreeze = await allowanceTx.freezeWithSigner(_signer);
     if (!allowanceFreeze) return false;
@@ -310,7 +312,7 @@ export default function HashConnectProvider({
     const _accountId = saveData.accountIds[0];
     const _provider = hashConnect.getProvider(netWork, saveData.topic, _accountId);
     const _signer = hashConnect.getSigner(_provider);
-    const _treasuryId = AccountId.fromString(env.TREASURY_ID_RAFFLE);
+    const _treasuryId = AccountId.fromString(env.TREASURY_ID);
     const _nft = new NftId(TokenId.fromString(tokenId_), serialNum_);
 
     const _hbar = new Hbar(amount_);

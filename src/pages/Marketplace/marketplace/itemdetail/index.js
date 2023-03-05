@@ -32,6 +32,7 @@ import { getRequest, postRequest } from "../../../../assets/api/apiRequests";
 import * as env from "../../../../env";
 
 import NavBar from '../../../../components/NavBar';
+import AppBar from '../../../../components/AppBar';
 
 export default function ItemDetail() {
     const { id } = useParams();
@@ -52,6 +53,7 @@ export default function ItemDetail() {
     const [isWatching, setIsWatching] = useState(false);
     const [favourites, setFavourites] = useState(0);
     const [watching, setWatching] = useState(0);
+    const [alertInfo, setAlertInfo] = useState([]);
 
     useEffect(() => {
         const getNftInfo = async (_id) => {
@@ -184,81 +186,9 @@ export default function ItemDetail() {
                 display: 'flex',
                 flexDirection: 'column'
             }}>
-                <div style={{
-                    display: 'flex',
-                    position: 'sticky',
-                    justifyContent: 'end',
-                    alignItems: 'center',
-                    height: '4rem',
-                    backgroundColor: '#121212',
-                    zIndex: '40',
-                    top: 0,
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        columnGap: '0.5rem',
-                        marginRight: '1rem',
-                    }}>
-                        <NotificationsOutlined
-                            sx={{
-                                color: 'whitesmoke',
-                            }}
-                            fontSize='large'
-                        />
-                        <Button onClick={() => {
-                            history.push('/profiles');
-                        }}
-                            variant='outlined'
-                            sx={{
-                                color: 'blueviolet',
-                                fontWeight: '700',
-                                padding: '0.25rem 1rem 0.25rem 1rem',
-                                backgroundColor: 'rgba(17,24,39,1)',
-                                borderColor: 'blueviolet',
-                                borderWidth: '2px',
-                                borderRadius: '0.5rem',
-                                lineHeight: 'inherit',
-                                fontSize: '100%',
-                                '&:hover': {
-                                    color: 'white',
-                                    backgroundColor: 'blueviolet',
-                                    borderColor: 'blueviolet',
-                                },
-                                '&:focus': {
-                                    outline: 'none',
-                                    boxShadow: 'none',
-                                }
-                            }}>
-                            Profile
-                        </Button>
-                        <Button onClick={() => {
-
-                        }}
-                            variant='outlined'
-                            sx={{
-                                color: 'gray',
-                                fontWeight: '700',
-                                padding: '0.25rem 1rem 0.25rem 1rem',
-                                backgroundColor: 'rgba(17,24,39,1)',
-                                borderColor: 'gray',
-                                borderWidth: '2px',
-                                borderRadius: '0.5rem',
-                                lineHeight: 'inherit',
-                                fontSize: '100%',
-                                '&:hover': {
-                                    borderWidth: '2px',
-                                    color: 'whitesmoke',
-                                    borderColor: 'whitesmoke',
-                                },
-                                '&:focus': {
-                                    outline: 'none',
-                                    boxShadow: 'none',
-                                }
-                            }}>
-                            Logout
-                        </Button>
-                    </div>
-                </div>
+                <AppBar 
+                    alertInfo={alertInfo}
+                />
                 {
                     nftInfo &&
                     <Box component="main" sx={{
@@ -294,11 +224,13 @@ export default function ItemDetail() {
                                         <video style={{
                                             position: 'absolute',
                                             borderRadius: '0.375rem',
+                                            maxWidth: '564px',
                                         }} autoPlay loop>
                                             <source src={nftInfo.imageUrl} />
                                         </video>
                                         <img alt='' src={nftInfo.imageUrl} style={{
                                             borderRadius: '0.375rem',
+                                            maxWidth: '564px',
                                         }} />
                                     </Box>
                                 </Grid>
@@ -638,6 +570,25 @@ export default function ItemDetail() {
                                                 <Button onClick={async () => {
                                                     setLoadingView(true);
 
+                                                    const _allowancePostData = {
+                                                        account_id: accountIds[0],
+                                                        token_id: itemDetailInfo.token_id,
+                                                        serial_number: itemDetailInfo.serial_number
+                                                    };
+
+                                                    // allowance NFT
+                                                    const _allowanceRes = await postRequest(env.SERVER_URL + "/api/marketplace/allowance_nft", _allowancePostData);
+                                                    if (!_allowanceRes) {
+                                                        toast.error("Something wrong with server!");
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+                                                    if (!_allowanceRes.result) {
+                                                        toast.error(_allowanceRes.error);
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+
                                                     // associate check
                                                     const getResult = await associateCheck(accountIds[0], itemDetailInfo.token_id);
                                                     if (!getResult.result) {
@@ -650,13 +601,13 @@ export default function ItemDetail() {
 
                                                         if (!_associateResult) {
                                                             setLoadingView(false);
-                                                            toast.error("something wrong with associate!");
+                                                            toast.error("Error! Something wrong with associate! Please try again!");
                                                             return;
                                                         }
                                                     }
 
-                                                    // send hbar
-                                                    const _res = await buyNFT(itemDetailInfo.owner_accountid, itemDetailInfo.price);
+                                                    // receive nft and send hbar
+                                                    const _res = await buyNFT(itemDetailInfo.owner_accountid, itemDetailInfo.token_id, itemDetailInfo.serial_number, itemDetailInfo.price);
                                                     if (!_res) {
                                                         toast.error("Error! The transaction was rejected, or failed! Please try again!");
                                                         setLoadingView(false);
@@ -665,15 +616,14 @@ export default function ItemDetail() {
 
                                                     // set allowance buyer
                                                     const _nftInfo = {
-                                                        e: btoa(itemDetailInfo.token_id),
-                                                        f: btoa(itemDetailInfo.serial_number)
+                                                        d: btoa(itemDetailInfo.token_id),
+                                                        e: btoa(itemDetailInfo.serial_number)
                                                     };
 
                                                     const _postData = {
                                                         a: _nftInfo,
-                                                        b: btoa(itemDetailInfo.owner_accountid),
-                                                        c: btoa(accountIds[0]),
-                                                        d: btoa(itemDetailInfo.price)
+                                                        b: btoa(accountIds[0]),
+                                                        c: btoa(itemDetailInfo.price)
                                                     };
                                                     const _sendNftRes = await postRequest(env.SERVER_URL + "/api/marketplace/send_nft", _postData);
                                                     if (!_sendNftRes) {
@@ -688,7 +638,6 @@ export default function ItemDetail() {
                                                     }
 
                                                     toast.success('success!');
-                                                    toast.success(_sendNftRes.data);
                                                     setLoadingView(false);
                                                     setBuySuccessfulViewFlag(true);
                                                 }}

@@ -28,6 +28,7 @@ import { getRequest, postRequest } from "../../../assets/api/apiRequests";
 import * as env from "../../../env";
 
 import NavBar from '../../../components/NavBar';
+import AppBar from '../../../components/AppBar';
 import NFTCard from "../../../components/NFTCard";
 
 const pagenationDisplayCount = 24;
@@ -45,6 +46,7 @@ export default function Profile() {
 
     const [nftPageIndex, setNftPageIndex] = useState(1);
     const [currentPageNftList, setCurrentPageNftList] = useState([]);
+    const [alertInfo, setAlertInfo] = useState([]);
 
     const [tabValue, setTabValue] = useState('Owned');
 
@@ -221,374 +223,383 @@ export default function Profile() {
             minHeight: '100vh',
         }}>
             <NavBar />
-            <Box component="main" sx={{
+            <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                flexGrow: 1,
-                p: 3,
-                backgroundColor: '#ffc0ff',
-                marginLeft: '5rem'
+                width: '100%',
             }}>
-                {/* account info */}
-                {
-                    profileData &&
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginTop: '100px',
-                        marginBottom: '10px',
-                        position: 'relative'
-                    }}>
-                        <Avatar alt={profileData.accountId} src={env.SERVER_URL + profileData.avatarUrl}
-                            sx={{
-                                width: 128,
-                                height: 128,
-                                fontSize: '64px',
-                                backgroundColor: '#e0e0e0',
-                                border: '2px solid white'
-                            }}
-                        />
+                <AppBar
+                    alertInfo={alertInfo}
+                />
+                <Box component="main" sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flexGrow: 1,
+                    p: 3,
+                    backgroundColor: '#ffc0ff',
+                    marginLeft: '5rem'
+                }}>
+                    {/* account info */}
+                    {
+                        profileData &&
                         <div style={{
                             display: 'flex',
-                            flexDirection: 'column',
-                            marginLeft: '20px'
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginTop: '100px',
+                            marginBottom: '10px',
+                            position: 'relative'
                         }}>
+                            <Avatar alt={profileData.accountId} src={env.SERVER_URL + profileData.avatarUrl}
+                                sx={{
+                                    width: 128,
+                                    height: 128,
+                                    fontSize: '64px',
+                                    backgroundColor: '#e0e0e0',
+                                    border: '2px solid white'
+                                }}
+                            />
                             <div style={{
                                 display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center'
+                                flexDirection: 'column',
+                                marginLeft: '20px'
                             }}>
-                                <p style={{
-                                    width: 180,
-                                    margin: '0',
-                                    fontSize: '24px',
-                                    fontWeight: '700',
-                                    color: '#873135',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis'
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    alignItems: 'center'
                                 }}>
-                                    {profileData.playerId}
-                                </p>
-                                <Button
-                                    sx={{
-                                        height: '25px',
-                                        borderRadius: '21px',
-                                        textTransform: 'none',
-                                        fontSize: 16,
-                                        fontWeight: 700,
-                                        color: 'white',
-                                        padding: '0 25px',
-                                        backgroundColor: '#e74895',
-                                        marginRight: '5px',
-                                        '&:hover': {
-                                            backgroundColor: 'grey',
-                                            boxShadow: 'none',
-                                        },
-                                        '&:focus': {
-                                            outline: 'none',
-                                            boxShadow: 'none',
-                                        }
+                                    <p style={{
+                                        width: 180,
+                                        margin: '0',
+                                        fontSize: '24px',
+                                        fontWeight: '700',
+                                        color: '#873135',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
                                     }}>
-                                    Edit
-                                </Button>
+                                        {profileData.playerId}
+                                    </p>
+                                    <Button
+                                        sx={{
+                                            height: '25px',
+                                            borderRadius: '21px',
+                                            textTransform: 'none',
+                                            fontSize: 16,
+                                            fontWeight: 700,
+                                            color: 'white',
+                                            padding: '0 25px',
+                                            backgroundColor: '#e74895',
+                                            marginRight: '5px',
+                                            '&:hover': {
+                                                backgroundColor: 'grey',
+                                                boxShadow: 'none',
+                                            },
+                                            '&:focus': {
+                                                outline: 'none',
+                                                boxShadow: 'none',
+                                            }
+                                        }}>
+                                        Edit
+                                    </Button>
+                                </div>
+                                <LinearProgress variant='determinate' value={(profileData.currentLevelScore / profileData.targetLevelScore) * 100} />
+                                <p style={{
+                                    margin: '0',
+                                    fontSize: '18px',
+                                    fontWeight: '700',
+                                    color: '#1976d2',
+                                    marginBottom: '5px'
+                                }}>
+                                    Level : {profileData.level}
+                                </p>
                             </div>
-                            <LinearProgress variant='determinate' value={(profileData.currentLevelScore / profileData.targetLevelScore) * 100} />
-                            <p style={{
-                                margin: '0',
-                                fontSize: '18px',
-                                fontWeight: '700',
-                                color: '#1976d2',
-                                marginBottom: '5px'
-                            }}>
-                                Level : {profileData.level}
-                            </p>
                         </div>
-                    </div>
-                }
-                <Box sx={{ width: '100%', typography: 'body1' }}>
-                    <TabContext value={tabValue}>
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                            <TabList onChange={handleTabChange} aria-label="lab API tabs example">
-                                <Tab label="Owned" value="Owned" />
-                                <Tab label="Listings" value="Listings" />
-                                <Tab label="Collections" value="Collections" />
-                            </TabList>
-                        </Box>
-                        <TabPanel value="Owned">
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                            }}>
-                                <Box>
-                                    {
-                                        currentPageNftList?.length == 0 &&
-                                        <p style={{
-                                            fontSize: 13,
-                                            fontWeight: 700,
-                                            color: '#8b1832',
-                                            margin: '5px 25px 25px 25px',
-                                            textTransform: 'none',
-                                            textAlign: 'center',
-                                        }}>
-                                            No NFT
-                                        </p>
-                                    }
-                                    {
-                                        currentPageNftList?.length > 0 &&
-                                        currentPageNftList.map((item, index) => {
-                                            return <Box key={index}
-                                                sx={{
-                                                    display: 'flex',
-                                                    flexDirection: 'row',
-                                                    float: 'left',
-                                                    width: '250px',
-                                                    padding: '5px',
-                                                    margin: '5px'
-                                                }}>
-                                                <NFTCard nftInfo={item}
-                                                    onClickNFTCard={() => {
-                                                        history.push(`/profile/${item.token_id}/${item.serial_number}`);
-                                                    }}
-                                                />
-                                            </Box>
-                                        })
-                                    }
-                                </Box>
-                                <Box>
-                                    {
-                                        walletNftInfo?.length > 0 &&
-                                        <div style={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            justifyContent: 'right',
-                                            paddingTop: '10px',
-                                            paddingRight: '10px',
-                                        }}>
-                                            <Pagination
-                                                sx={{
-                                                    '& li': {
-                                                        padding: '0',
-                                                        '& button': {
-                                                            '&:focus': {
-                                                                outline: 'none',
-                                                            },
-                                                        },
-                                                    },
-                                                }}
-                                                page={nftPageIndex}
-                                                onChange={(event, value) => {
-                                                    resetNftListToDisplay(value, walletNftInfo);
-                                                    setNftPageIndex(value);
-                                                }}
-                                                count={parseInt(walletNftInfo.length / pagenationDisplayCount) + (walletNftInfo.length % pagenationDisplayCount !== 0 ? 1 : 0)}
-                                                variant="outlined" />
-                                        </div>
-                                    }
-                                </Box>
+                    }
+                    <Box sx={{ width: '100%', typography: 'body1' }}>
+                        <TabContext value={tabValue}>
+                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                                <TabList onChange={handleTabChange} aria-label="lab API tabs example">
+                                    <Tab label="Owned" value="Owned" />
+                                    <Tab label="Listings" value="Listings" />
+                                    <Tab label="Collections" value="Collections" />
+                                </TabList>
                             </Box>
-                        </TabPanel>
-                        <TabPanel value="Listings">
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'column'
-                            }}>
-                                <Box>
-                                    {
-                                        currentPageNftList?.length == 0 &&
-                                        <p style={{
-                                            fontSize: 13,
-                                            fontWeight: 700,
-                                            color: '#8b1832',
-                                            margin: '5px 25px 25px 25px',
-                                            textTransform: 'none',
-                                            textAlign: 'center',
-                                        }}>
-                                            No NFT
-                                        </p>
-                                    }
-                                    {
-                                        currentPageNftList?.length > 0 &&
-                                        currentPageNftList.map((item, index) => {
-                                            return <Box key={index}
-                                                sx={{
-                                                    display: 'flex',
-                                                    flexDirection: 'row',
-                                                    float: 'left',
-                                                    width: '250px',
-                                                    padding: '5px',
-                                                    margin: '5px'
-                                                }}>
-                                                <NFTCard nftInfo={item}
-                                                    onClickNFTCard={() => {
-                                                        history.push(`/profile/${item.token_id}/${item.serial_number}`);
-                                                    }}
-                                                />
-                                            </Box>
-                                        })
-                                    }
-                                </Box>
-                                <Box>
-                                    {
-                                        listingNftInfo?.length > 0 &&
-                                        <div style={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            justifyContent: 'right',
-                                            paddingTop: '10px',
-                                            paddingRight: '10px',
-                                        }}>
-                                            <Pagination
-                                                sx={{
-                                                    '& li': {
-                                                        padding: '0',
-                                                        '& button': {
-                                                            '&:focus': {
-                                                                outline: 'none',
-                                                            },
-                                                        },
-                                                    },
-                                                }}
-                                                page={nftPageIndex}
-                                                onChange={(event, value) => {
-                                                    resetNftListToDisplay(value, listingNftInfo);
-                                                    setNftPageIndex(value);
-                                                }}
-                                                count={parseInt(listingNftInfo.length / pagenationDisplayCount) + (listingNftInfo.length % pagenationDisplayCount !== 0 ? 1 : 0)}
-                                                variant="outlined" />
-                                        </div>
-                                    }
-                                </Box>
-                            </Box>
-                        </TabPanel>
-                        <TabPanel value="Collections">
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                padding: '1.25rem 1.5rem 2.5rem 1.5rem',
-                            }}>
-                                <Box>
-                                    {
-                                        collectionList?.length == 0 &&
-                                        <p style={{
-                                            fontSize: 13,
-                                            fontWeight: 700,
-                                            color: '#8b1832',
-                                            margin: '5px 25px 25px 25px',
-                                            textTransform: 'none',
-                                            textAlign: 'center',
-                                        }}>
-                                            No Collection
-                                        </p>
-                                    }
-                                    {
-                                        collectionList?.length > 0 &&
-                                        collectionList.map((item, index) => {
-                                            return <Box key={index}>
-                                                <Box
+                            <TabPanel value="Owned">
+                                <Box sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                }}>
+                                    <Box>
+                                        {
+                                            currentPageNftList?.length == 0 &&
+                                            <p style={{
+                                                fontSize: 13,
+                                                fontWeight: 700,
+                                                color: '#8b1832',
+                                                margin: '5px 25px 25px 25px',
+                                                textTransform: 'none',
+                                                textAlign: 'center',
+                                            }}>
+                                                No NFT
+                                            </p>
+                                        }
+                                        {
+                                            currentPageNftList?.length > 0 &&
+                                            currentPageNftList.map((item, index) => {
+                                                return <Box key={index}
                                                     sx={{
                                                         display: 'flex',
-                                                        position: 'relative',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center',
-                                                        width: '100%',
-                                                        textAlign: 'left',
-                                                        padding: '0.5rem 0',
-                                                        borderBottom: '1px solid #8b1832',
-                                                        margin: '0.5px 0',
-                                                        backgroundColor: '#ffc0ff',
+                                                        flexDirection: 'row',
+                                                        float: 'left',
+                                                        width: '250px',
+                                                        padding: '5px',
+                                                        margin: '5px'
                                                     }}>
-                                                    <div style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                    }}>
-                                                        <div style={{
-                                                            position: 'relative',
-                                                        }}>
-                                                            <video style={{
-                                                                position: 'absolute',
-                                                                display: 'block',
-                                                                verticalAlign: 'middle',
-                                                                borderRadius: '0.375rem',
-                                                                maxWidth: '100%',
-                                                                width: '2.5rem',
-                                                                height: '2.5rem',
-                                                            }} autoPlay loop>
-                                                                <source src={item.imageUrl} />
-                                                            </video>
-                                                            <img alt='' src={item.imageUrl}
-                                                                style={{
-                                                                    display: 'block',
-                                                                    verticalAlign: 'middle',
-                                                                    width: '2.5rem',
-                                                                    height: '2.5rem',
-                                                                    borderRadius: '0.375rem',
-                                                                    maxWidth: '100%',
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <div style={{
-                                                            fontSize: '1.125rem',
-                                                            fontWeight: '500',
-                                                            lineHeight: '1.5rem',
-                                                            marginLeft: '10px',
-                                                            marginRight: '10px',
-                                                        }}>
-                                                            <h2 style={{
-                                                                fontSize: '1.25rem',
-                                                                lineHeight: '1.75rem',
-                                                                fontWeight: 'inherit',
-                                                                margin: 0,
-                                                            }}>
-                                                                {item.creator}
-                                                            </h2>
-                                                        </div>
-                                                    </div>
+                                                    <NFTCard nftInfo={item}
+                                                        onClickNFTCard={() => {
+                                                            history.push(`/profile/${item.token_id}/${item.serial_number}`);
+                                                        }}
+                                                    />
                                                 </Box>
-                                            </Box>
-                                        })
-                                    }
-                                </Box>
-                                <Box>
-                                    {
-                                        collectionList?.length > 0 &&
-                                        <div style={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            justifyContent: 'right',
-                                            paddingTop: '10px',
-                                            paddingRight: '10px',
-                                        }}>
-                                            <Pagination
-                                                sx={{
-                                                    '& li': {
-                                                        padding: '0',
-                                                        '& button': {
-                                                            '&:focus': {
-                                                                outline: 'none',
+                                            })
+                                        }
+                                    </Box>
+                                    <Box>
+                                        {
+                                            walletNftInfo?.length > 0 &&
+                                            <div style={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'right',
+                                                paddingTop: '10px',
+                                                paddingRight: '10px',
+                                            }}>
+                                                <Pagination
+                                                    sx={{
+                                                        '& li': {
+                                                            padding: '0',
+                                                            '& button': {
+                                                                '&:focus': {
+                                                                    outline: 'none',
+                                                                },
                                                             },
                                                         },
-                                                    },
-                                                }}
-                                                page={nftPageIndex}
-                                                onChange={(event, value) => {
-                                                    resetNftListToDisplay(value, collectionList);
-                                                    setNftPageIndex(value);
-                                                }}
-                                                count={parseInt(collectionList.length / pagenationDisplayCount) + (collectionList.length % pagenationDisplayCount !== 0 ? 1 : 0)}
-                                                variant="outlined" />
-                                        </div>
-                                    }
+                                                    }}
+                                                    page={nftPageIndex}
+                                                    onChange={(event, value) => {
+                                                        resetNftListToDisplay(value, walletNftInfo);
+                                                        setNftPageIndex(value);
+                                                    }}
+                                                    count={parseInt(walletNftInfo.length / pagenationDisplayCount) + (walletNftInfo.length % pagenationDisplayCount !== 0 ? 1 : 0)}
+                                                    variant="outlined" />
+                                            </div>
+                                        }
+                                    </Box>
                                 </Box>
-                            </Box>
-                        </TabPanel>
-                    </TabContext>
+                            </TabPanel>
+                            <TabPanel value="Listings">
+                                <Box sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column'
+                                }}>
+                                    <Box>
+                                        {
+                                            currentPageNftList?.length == 0 &&
+                                            <p style={{
+                                                fontSize: 13,
+                                                fontWeight: 700,
+                                                color: '#8b1832',
+                                                margin: '5px 25px 25px 25px',
+                                                textTransform: 'none',
+                                                textAlign: 'center',
+                                            }}>
+                                                No NFT
+                                            </p>
+                                        }
+                                        {
+                                            currentPageNftList?.length > 0 &&
+                                            currentPageNftList.map((item, index) => {
+                                                return <Box key={index}
+                                                    sx={{
+                                                        display: 'flex',
+                                                        flexDirection: 'row',
+                                                        float: 'left',
+                                                        width: '250px',
+                                                        padding: '5px',
+                                                        margin: '5px'
+                                                    }}>
+                                                    <NFTCard nftInfo={item}
+                                                        onClickNFTCard={() => {
+                                                            history.push(`/profile/${item.token_id}/${item.serial_number}`);
+                                                        }}
+                                                    />
+                                                </Box>
+                                            })
+                                        }
+                                    </Box>
+                                    <Box>
+                                        {
+                                            listingNftInfo?.length > 0 &&
+                                            <div style={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'right',
+                                                paddingTop: '10px',
+                                                paddingRight: '10px',
+                                            }}>
+                                                <Pagination
+                                                    sx={{
+                                                        '& li': {
+                                                            padding: '0',
+                                                            '& button': {
+                                                                '&:focus': {
+                                                                    outline: 'none',
+                                                                },
+                                                            },
+                                                        },
+                                                    }}
+                                                    page={nftPageIndex}
+                                                    onChange={(event, value) => {
+                                                        resetNftListToDisplay(value, listingNftInfo);
+                                                        setNftPageIndex(value);
+                                                    }}
+                                                    count={parseInt(listingNftInfo.length / pagenationDisplayCount) + (listingNftInfo.length % pagenationDisplayCount !== 0 ? 1 : 0)}
+                                                    variant="outlined" />
+                                            </div>
+                                        }
+                                    </Box>
+                                </Box>
+                            </TabPanel>
+                            <TabPanel value="Collections">
+                                <Box sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    padding: '1.25rem 1.5rem 2.5rem 1.5rem',
+                                }}>
+                                    <Box>
+                                        {
+                                            collectionList?.length == 0 &&
+                                            <p style={{
+                                                fontSize: 13,
+                                                fontWeight: 700,
+                                                color: '#8b1832',
+                                                margin: '5px 25px 25px 25px',
+                                                textTransform: 'none',
+                                                textAlign: 'center',
+                                            }}>
+                                                No Collection
+                                            </p>
+                                        }
+                                        {
+                                            collectionList?.length > 0 &&
+                                            collectionList.map((item, index) => {
+                                                return <Box key={index}>
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            position: 'relative',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'center',
+                                                            width: '100%',
+                                                            textAlign: 'left',
+                                                            padding: '0.5rem 0',
+                                                            borderBottom: '1px solid #8b1832',
+                                                            margin: '0.5px 0',
+                                                            backgroundColor: '#ffc0ff',
+                                                        }}>
+                                                        <div style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                        }}>
+                                                            <div style={{
+                                                                position: 'relative',
+                                                            }}>
+                                                                <video style={{
+                                                                    position: 'absolute',
+                                                                    display: 'block',
+                                                                    verticalAlign: 'middle',
+                                                                    borderRadius: '0.375rem',
+                                                                    maxWidth: '100%',
+                                                                    width: '2.5rem',
+                                                                    height: '2.5rem',
+                                                                }} autoPlay loop>
+                                                                    <source src={item.imageUrl} />
+                                                                </video>
+                                                                <img alt='' src={item.imageUrl}
+                                                                    style={{
+                                                                        display: 'block',
+                                                                        verticalAlign: 'middle',
+                                                                        width: '2.5rem',
+                                                                        height: '2.5rem',
+                                                                        borderRadius: '0.375rem',
+                                                                        maxWidth: '100%',
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                            <div style={{
+                                                                fontSize: '1.125rem',
+                                                                fontWeight: '500',
+                                                                lineHeight: '1.5rem',
+                                                                marginLeft: '10px',
+                                                                marginRight: '10px',
+                                                            }}>
+                                                                <h2 style={{
+                                                                    fontSize: '1.25rem',
+                                                                    lineHeight: '1.75rem',
+                                                                    fontWeight: 'inherit',
+                                                                    margin: 0,
+                                                                }}>
+                                                                    {item.creator}
+                                                                </h2>
+                                                            </div>
+                                                        </div>
+                                                    </Box>
+                                                </Box>
+                                            })
+                                        }
+                                    </Box>
+                                    <Box>
+                                        {
+                                            collectionList?.length > 0 &&
+                                            <div style={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'right',
+                                                paddingTop: '10px',
+                                                paddingRight: '10px',
+                                            }}>
+                                                <Pagination
+                                                    sx={{
+                                                        '& li': {
+                                                            padding: '0',
+                                                            '& button': {
+                                                                '&:focus': {
+                                                                    outline: 'none',
+                                                                },
+                                                            },
+                                                        },
+                                                    }}
+                                                    page={nftPageIndex}
+                                                    onChange={(event, value) => {
+                                                        resetNftListToDisplay(value, collectionList);
+                                                        setNftPageIndex(value);
+                                                    }}
+                                                    count={parseInt(collectionList.length / pagenationDisplayCount) + (collectionList.length % pagenationDisplayCount !== 0 ? 1 : 0)}
+                                                    variant="outlined" />
+                                            </div>
+                                        }
+                                    </Box>
+                                </Box>
+                            </TabPanel>
+                        </TabContext>
+                    </Box>
                 </Box>
-            </Box>
+            </div>
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                 open={loadingView}

@@ -7,24 +7,14 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import {
-    Avatar,
     Backdrop,
-    Button,
-    LinearProgress,
     CircularProgress,
     Box,
-    Tab,
     Pagination,
-    IconButton,
-    Badge,
-    Divider,
-    Menu,
-    MenuItem,
 } from '@mui/material';
 
 import {
     ExpandMore,
-    NotificationsOutlined
 } from '@mui/icons-material';
 
 import { useHashConnect } from "../../../assets/api/HashConnectAPIProvider.tsx";
@@ -32,6 +22,7 @@ import { getRequest, postRequest } from "../../../assets/api/apiRequests";
 import * as env from "../../../env";
 
 import NavBar from '../../../components/NavBar';
+import AppBar from '../../../components/AppBar';
 import NFTCard from "../../../components/NFTCard";
 
 const pagenationDisplayCount = 24;
@@ -45,9 +36,7 @@ export default function Marketplace() {
     const [nftList, setNftList] = useState(null);
     const [nftPageIndex, setNftPageIndex] = useState(1);
     const [currentPageNftList, setCurrentPageNftList] = useState([]);
-    const [alertMenuAnchor, setAlertMenuAnchor] = useState(null);
     const [alertInfo, setAlertInfo] = useState([]);
-    const alertMenuOpenFlag = Boolean(alertMenuAnchor);
 
     useEffect(() => {
         const getNftList = async () => {
@@ -80,9 +69,6 @@ export default function Marketplace() {
         setCurrentPageNftList(nftList_.slice(_startIndex, _endIndex));
     }
 
-    const onClickAlertMenuItem = async (alertItemInfo) => {
-    }
-
     return (
         <Box sx={{
             display: 'flex',
@@ -96,103 +82,9 @@ export default function Marketplace() {
                 flexGrow: 1,
                 p: 3,
             }}>
-                <div style={{
-                    display: 'flex',
-                    position: 'sticky',
-                    justifyContent: 'end',
-                    alignItems: 'center',
-                    height: '4rem',
-                    backgroundColor: '#121212',
-                    zIndex: '40',
-                    top: 0,
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        columnGap: '0.5rem',
-                        marginRight: '1rem',
-                    }}>
-                        <IconButton
-                            sx={{
-                                color: 'gray',
-                                '&:hover': {
-                                    color: 'whitesmoke',
-                                    cursor: 'pointer',
-                                },
-                                '&:focus': {
-                                    outline: 'none',
-                                    boxShadow: 'none',
-                                },
-                            }}
-                            onClick={(e) => {
-                                setAlertMenuAnchor(e.currentTarget);
-                            }}
-                        >
-                            <Badge
-                                sx={{
-                                    'z-index': '0'
-                                }}
-                                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                                badgeContent={alertInfo.length}
-                                color='success'
-                            >
-                                <NotificationsOutlined fontSize='large' />
-                            </Badge>
-                        </IconButton>
-                        <Button onClick={() => {
-                            history.push('/profiles');
-                        }}
-                            variant='outlined'
-                            sx={{
-                                color: 'blueviolet',
-                                fontWeight: '700',
-                                padding: '0.25rem 1rem 0.25rem 1rem',
-                                backgroundColor: 'rgba(17,24,39,1)',
-                                borderColor: 'blueviolet',
-                                borderWidth: '2px',
-                                borderRadius: '0.5rem',
-                                lineHeight: 'inherit',
-                                fontSize: '100%',
-                                '&:hover': {
-                                    color: 'white',
-                                    backgroundColor: 'blueviolet',
-                                    borderColor: 'blueviolet',
-                                },
-                                '&:focus': {
-                                    outline: 'none',
-                                    boxShadow: 'none',
-                                }
-                            }}>
-                            Profile
-                        </Button>
-                        <Button onClick={() => {
-                            history.push('/login');
-                        }}
-                            variant='outlined'
-                            sx={{
-                                color: 'gray',
-                                fontWeight: '700',
-                                padding: '0.25rem 1rem 0.25rem 1rem',
-                                backgroundColor: 'rgba(17,24,39,1)',
-                                borderColor: 'gray',
-                                borderWidth: '2px',
-                                borderRadius: '0.5rem',
-                                lineHeight: 'inherit',
-                                fontSize: '100%',
-                                '&:hover': {
-                                    borderWidth: '2px',
-                                    color: 'whitesmoke',
-                                    borderColor: 'whitesmoke',
-                                },
-                                '&:focus': {
-                                    outline: 'none',
-                                    boxShadow: 'none',
-                                }
-                            }}>
-                            Logout
-                        </Button>
-                    </div>
-                </div>
+                <AppBar 
+                    alertInfo={alertInfo}
+                />
                 <Box sx={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -392,73 +284,6 @@ export default function Marketplace() {
                     </Box>
                 </Box>
             </div>
-            <Menu
-                anchorEl={alertMenuAnchor}
-                id='account-menu'
-                open={alertMenuOpenFlag}
-                onClick={() => {
-                    setAlertMenuAnchor(null);
-                }}
-                PaperProps={{
-                    elevation: 0,
-                    sx: {
-                        overflow: 'visible',
-                        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                        mt: 1.5,
-                        '&:before': {
-                            content: '""',
-                            display: 'block',
-                            position: 'absolute',
-                            top: 0,
-                            left: 16,
-                            width: 10,
-                            height: 10,
-                            backgroundColor: 'white',
-                            transform: 'translateY(-50%) rotate(45deg)',
-                            zIndex: 0
-                        }
-                    }
-                }}
-                transformOrigin={{ horizontal: 'left', vertical: 'top' }}
-                anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-            >
-                {
-                    alertInfo.length > 0 &&
-                    alertInfo.map((item, index) => {
-                        return <div key={index}>
-                            <MenuItem onClick={() => { onClickAlertMenuItem(item) }}>
-                                <p style={{
-                                    fontSize: 13,
-                                    margin: '0 0 0 5px',
-                                    textTransform: 'none'
-                                }}>
-                                    Got offer from $asdf
-                                </p>
-                            </MenuItem>
-                            {
-                                index < alertInfo.length - 1 &&
-                                <Divider />
-                            }
-                        </div>
-                    })
-                }
-                {
-                    alertInfo?.length == 0 &&
-                    <div>
-                        <MenuItem>
-                            <p style={{
-                                fontSize: 13,
-                                fontWeight: 700,
-                                color: '#8b1832',
-                                margin: '0 0 0 5px',
-                                textTransform: 'none'
-                            }}>
-                                No notification
-                            </p>
-                        </MenuItem>
-                    </div>
-                }
-            </Menu>
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                 open={loadingView}

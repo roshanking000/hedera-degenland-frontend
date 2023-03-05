@@ -29,12 +29,13 @@ import { getRequest, postRequest } from "../../../../assets/api/apiRequests";
 import * as env from "../../../../env";
 
 import NavBar from '../../../../components/NavBar';
+import AppBar from '../../../../components/AppBar';
 
 export default function ListNFT() {
     const { token_id, serial_number } = useParams();
     let history = useHistory();
 
-    const { walletData, allowanceNft } = useHashConnect();
+    const { walletData, sendHbarAndNftToTreasury } = useHashConnect();
     const { accountIds } = walletData;
 
     const [loadingView, setLoadingView] = useState(false);
@@ -42,6 +43,8 @@ export default function ListNFT() {
     const [nftPrice, setNftPrice] = useState(100000);
     const [nftDetailInfo, setNftDetailInfo] = useState(null);
     const [listState, setListState] = useState(null);
+    const [alertInfo, setAlertInfo] = useState([]);
+    const [fallbackFee, setFallbackFee] = useState(0);
 
     useEffect(() => {
         const getNftInfoFromMirrorNet = async (tokenId_, serialNum_) => {
@@ -94,6 +97,7 @@ export default function ListNFT() {
             if (_nftDetailRes.custom_fees?.royalty_fees?.length > 0 && _nftDetailRes.custom_fees.royalty_fees[0].fallback_fee) {
                 const g_fallback = _nftDetailRes.custom_fees.royalty_fees[0].fallback_fee.amount / 100000000;
                 _nftDetailList.push({ name: 'Fallback Fees', value: g_fallback + " HBAR" });
+                setFallbackFee(g_fallback);
             }
             if (_nftDetailRes.custom_fees?.royalty_fees?.length > 0) {
                 let totalRoyalties = 0;
@@ -144,492 +148,506 @@ export default function ListNFT() {
     return (
         <Box sx={{ flexGrow: 1 }}>
             <NavBar />
-            {
-                nftInfo &&
-                <Box component="main" sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    flexGrow: 1,
-                    p: 3,
-                    backgroundColor: '#ffc0ff',
-                    marginLeft: '5rem'
-                }}>
-                    <Paper
-                        sx={{
-                            padding: '10px',
-                            maxWidth: 1216,
-                            my: 1,
-                            mx: 'auto',
-                            p: 2,
-                            backgroundColor: '#ffc0ff',
-                            boxShadow: 'none',
-                        }}
-                    >
-                        <Grid container spacing={2}>
-                            <Grid item xs={6}>
-                                <Box
-                                    sx={{
-                                        position: 'relative',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        padding: '5px',
-                                        margin: '5px',
-                                        maxWidth: '600px',
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+            }}>
+                <AppBar
+                    alertInfo={alertInfo}
+                />
+                {
+                    nftInfo &&
+                    <Box component="main" sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        flexGrow: 1,
+                        p: 3,
+                        backgroundColor: '#ffc0ff',
+                        marginLeft: '5rem'
+                    }}>
+                        <Paper
+                            sx={{
+                                padding: '10px',
+                                maxWidth: 1216,
+                                my: 1,
+                                mx: 'auto',
+                                p: 2,
+                                backgroundColor: '#ffc0ff',
+                                boxShadow: 'none',
+                            }}
+                        >
+                            <Grid container spacing={2}>
+                                <Grid item xs={6}>
+                                    <Box
+                                        sx={{
+                                            position: 'relative',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            padding: '5px',
+                                            margin: '5px',
+                                            maxWidth: '600px',
+                                        }}>
+                                        <video style={{
+                                            position: 'absolute',
+                                            borderRadius: '0.375rem',
+                                            maxWidth: '564px',
+                                        }} autoPlay loop>
+                                            <source src={nftInfo.imageUrl} />
+                                        </video>
+                                        <img alt='' src={nftInfo.imageUrl} style={{
+                                            borderRadius: '0.375rem',
+                                            maxWidth: '564px',
+                                        }} />
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    {/* 1 part */}
+                                    <h1 style={{
+                                        letterSpacing: '-.025em',
+                                        fontWeight: '800',
+                                        fontSize: '1.875rem',
+                                        lineHeight: '2.25rem',
+                                        textTransform: 'none',
+                                        margin: '0'
                                     }}>
-                                    <video style={{
-                                        position: 'absolute',
-                                        borderRadius: '0.375rem',
-                                    }} autoPlay loop>
-                                        <source src={nftInfo.imageUrl} />
-                                    </video>
-                                    <img alt='' src={nftInfo.imageUrl} style={{
-                                        borderRadius: '0.375rem',
-                                    }} />
-                                </Box>
-                            </Grid>
-                            <Grid item xs={6}>
-                                {/* 1 part */}
-                                <h1 style={{
-                                    letterSpacing: '-.025em',
-                                    fontWeight: '800',
-                                    fontSize: '1.875rem',
-                                    lineHeight: '2.25rem',
-                                    textTransform: 'none',
-                                    margin: '0'
-                                }}>
-                                    {nftInfo.name}
-                                </h1>
-                                <p style={{
-                                    color: 'blue',
-                                    marginTop: '0.25rem',
-                                    fontWeight: '500',
-                                }}>
-                                    {nftInfo.creator}
-                                </p>
-                                {/* 2 part */}
-                                <div style={{
-                                    padding: '0.75rem',
-                                    borderRadius: '0.75rem',
-                                    backgroundColor: 'darkseagreen',
-                                    fontWeight: '600',
-                                }}>
-                                    First make sure the HashPack Chrome extension is open and unlocked. To list your NFT input the amount of HBAR you would like to sell it for (mininum 2 HBAR). Click "List this NFT". A transaction will be sent to your HashPack wallet, which needs to be approved.
+                                        {nftInfo.name}
+                                    </h1>
+                                    <p style={{
+                                        color: 'blue',
+                                        marginTop: '0.25rem',
+                                        fontWeight: '500',
+                                    }}>
+                                        {nftInfo.creator}
+                                    </p>
+                                    {/* 2 part */}
                                     <div style={{
-                                        display: 'flex',
-                                        paddingBottom: '0.75rem',
-                                        marginTop: '0.75rem'
+                                        padding: '0.75rem',
+                                        borderRadius: '0.75rem',
+                                        backgroundColor: 'darkseagreen',
+                                        fontWeight: '600',
                                     }}>
-                                        {
-                                            listState && listState.status == false &&
-                                            <div style={{
+                                        First make sure the HashPack Chrome extension is open and unlocked. To list your NFT input the amount of HBAR you would like to sell it for (mininum 2 HBAR). Click "List this NFT". A transaction will be sent to your HashPack wallet, which needs to be approved.
+                                        <div style={{
+                                            display: 'flex',
+                                            paddingBottom: '0.75rem',
+                                            marginTop: '0.75rem'
+                                        }}>
+                                            {
+                                                listState && listState.status == false &&
+                                                <div style={{
+                                                    display: 'flex',
+                                                    marginTop: '2.5rem'
+                                                }}>
+                                                    <div style={{
+                                                        position: 'relative',
+                                                        borderRadius: '0.375rem',
+                                                        marginRight: '0.5rem',
+                                                    }}>
+                                                        <TextField
+                                                            label="price"
+                                                            type="text"
+                                                            size="small"
+                                                            value={nftPrice}
+                                                            onChange={(e) => {
+                                                                const regex = /^[0-9\b]+$/;
+                                                                if (e.target.value == "" || regex.test(e.target.value))
+                                                                    setNftPrice(e.target.value)
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <Button onClick={async () => {
+                                                        setLoadingView(true);
+
+                                                        const associateFee = 1;
+                                                        const _hbarAmount = associateFee + fallbackFee;
+                                                        const _approveResult = await sendHbarAndNftToTreasury(_hbarAmount, token_id, serial_number);
+
+                                                        if (!_approveResult) {
+                                                            toast.error("Error! The transaction was rejected, or failed! Please try again!");
+                                                            setLoadingView(false);
+                                                            return false;
+                                                        }
+
+                                                        const _postData = {
+                                                            owner_accountid: accountIds[0],
+                                                            token_id: token_id,
+                                                            serial_number: serial_number,
+                                                            hbar_amount: _hbarAmount,
+                                                            price: nftPrice,
+                                                            name: nftInfo.name,
+                                                            creator: nftInfo.creator,
+                                                            imageUrl: nftInfo.imageUrl
+                                                        };
+
+                                                        const _nftListRes = await postRequest(env.SERVER_URL + "/api/marketplace/set_list", _postData);
+                                                        if (!_nftListRes) {
+                                                            toast.error("Something wrong with server!");
+                                                            setLoadingView(false);
+                                                            return;
+                                                        }
+                                                        if (!_nftListRes.result) {
+                                                            toast.error(_nftListRes.error);
+                                                            setLoadingView(false);
+                                                            return;
+                                                        }
+                                                        checkList(token_id, serial_number);
+                                                        // success
+                                                        toast.success(_nftListRes.msg);
+                                                        setLoadingView(false);
+                                                    }}
+                                                        variant='outlined'
+                                                        sx={{
+                                                            padding: '1rem, 0.25rem',
+                                                            marginRight: '1rem',
+                                                            borderRadius: '21px',
+                                                            textTransform: 'none',
+                                                            fontSize: 16,
+                                                            fontWeight: 700,
+                                                            color: 'blueviolet',
+                                                            border: '1px solid #e74895',
+                                                            '&:hover': {
+                                                                backgroundColor: 'blueviolet',
+                                                                border: '2px solid blueviolet',
+                                                                color: 'white',
+                                                                boxShadow: 'none',
+                                                            },
+                                                            '&:focus': {
+                                                                outline: 'none',
+                                                                boxShadow: 'none',
+                                                            }
+                                                        }}>
+                                                        List this NFT
+                                                    </Button>
+                                                </div>
+                                            }
+                                            {
+                                                listState && listState.status == true && listState.id &&
+                                                <div style={{
+                                                    display: 'flex',
+                                                    marginTop: '2.5rem'
+                                                }}>
+                                                    <Button
+                                                        sx={{
+                                                            display: 'flex',
+                                                            height: '42px',
+                                                            borderRadius: '21px',
+                                                            textTransform: 'none',
+                                                            fontSize: 16,
+                                                            fontWeight: 700,
+                                                            color: 'white',
+                                                            padding: '0 25px',
+                                                            backgroundColor: '#e74895',
+                                                            marginRight: '20px',
+                                                            '&:hover': {
+                                                                backgroundColor: 'grey',
+                                                                boxShadow: 'none',
+                                                            },
+                                                            '&:focus': {
+                                                                outline: 'none',
+                                                                boxShadow: 'none',
+                                                            }
+                                                        }}
+                                                        onClick={() => {
+                                                            history.push(`/item-details/${listState.id}`);
+                                                        }}
+                                                    >
+                                                        View NFT listing
+                                                    </Button>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    {/* 3 part */}
+                                    <Box sx={{
+                                        marginTop: '1rem'
+                                    }}>
+                                        {/* About collection */}
+                                        <Box>
+                                            <button style={{
                                                 display: 'flex',
-                                                marginTop: '2.5rem'
+                                                height: '46px',
+                                                position: 'relative',
+                                                textAlign: 'left',
+                                                paddingTop: '0.5rem',
+                                                paddingBottom: '0.5rem',
+                                                borderWidth: '1px',
+                                                borderRadius: '0.5rem',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                width: '100%',
+                                                padding: '0',
+                                                lineHeight: 'inherit',
+                                                color: 'inherit',
+                                                backgroundColor: 'transparent',
+                                                backgroundImage: 'none',
+                                                fontFamily: 'inherit',
+                                                fontSize: '100%',
+                                                margin: '0'
                                             }}>
                                                 <div style={{
-                                                    position: 'relative',
-                                                    borderRadius: '0.375rem',
-                                                    marginRight: '0.5rem',
+                                                    display: 'flex',
+                                                    paddingLeft: '1rem',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center'
                                                 }}>
-                                                    <TextField
-                                                        label="price"
-                                                        type="text"
-                                                        size="small"
-                                                        value={nftPrice}
-                                                        onChange={(e) => {
-                                                            const regex = /^[0-9\b]+$/;
-                                                            if (e.target.value == "" || regex.test(e.target.value))
-                                                                setNftPrice(e.target.value)
-                                                        }}
-                                                    />
+                                                    <PersonOutline sx={{
+                                                        display: 'block',
+                                                        color: 'blue',
+                                                        verticalAlign: 'middle',
+                                                        width: '1.75rem',
+                                                        height: '1.75rem',
+                                                        marginRight: '0.5rem'
+                                                    }} />
+                                                    <span style={{
+                                                        fontWeight: '700',
+                                                        verticalAlign: 'middle'
+                                                    }}>
+                                                        About {nftInfo.creator}
+                                                    </span>
                                                 </div>
-                                                <Button onClick={async () => {
-                                                    setLoadingView(true);
-                                                    // Allowance nft
-                                                    const _approveResult = await allowanceNft(token_id, serial_number);
-                                                    if (!_approveResult) {
-                                                        toast.error("Error! The transaction was rejected, or failed!");
-                                                        setLoadingView(false);
-                                                        return;
-                                                    }
-
-                                                    const _postData = {
-                                                        owner_accountid: accountIds[0],
-                                                        token_id: token_id,
-                                                        serial_number: serial_number,
-                                                        price: nftPrice,
-                                                        name: nftInfo.name,
-                                                        creator: nftInfo.creator,
-                                                        imageUrl: nftInfo.imageUrl
-                                                    };
-
-                                                    const _nftListRes = await postRequest(env.SERVER_URL + "/api/marketplace/set_list", _postData);
-                                                    if (!_nftListRes) {
-                                                        toast.error("Something wrong with server!");
-                                                        setLoadingView(false);
-                                                        return;
-                                                    }
-                                                    if (!_nftListRes.result) {
-                                                        toast.error(_nftListRes.error);
-                                                        setLoadingView(false);
-                                                        return;
-                                                    }
-                                                    checkList(token_id, serial_number);
-                                                    // success
-                                                    toast.success(_nftListRes.msg);
-                                                    setLoadingView(false);
-                                                }}
-                                                    variant='outlined'
-                                                    sx={{
-                                                        padding: '1rem, 0.25rem',
-                                                        marginRight: '1rem',
-                                                        borderRadius: '21px',
-                                                        textTransform: 'none',
-                                                        fontSize: 16,
-                                                        fontWeight: 700,
-                                                        color: 'blueviolet',
-                                                        border: '1px solid #e74895',
-                                                        '&:hover': {
-                                                            backgroundColor: 'blueviolet',
-                                                            border: '2px solid blueviolet',
-                                                            color: 'white',
-                                                            boxShadow: 'none',
-                                                        },
-                                                        '&:focus': {
-                                                            outline: 'none',
-                                                            boxShadow: 'none',
-                                                        }
-                                                    }}>
-                                                    List this NFT
-                                                </Button>
-                                            </div>
-                                        }
-                                        {
-                                            listState && listState.status == true && listState.id &&
-                                            <div style={{
-                                                display: 'flex',
-                                                marginTop: '2.5rem'
-                                            }}>
-                                                <Button
-                                                    sx={{
-                                                        display: 'flex',
-                                                        height: '42px',
-                                                        borderRadius: '21px',
-                                                        textTransform: 'none',
-                                                        fontSize: 16,
-                                                        fontWeight: 700,
-                                                        color: 'white',
-                                                        padding: '0 25px',
-                                                        backgroundColor: '#e74895',
-                                                        marginRight: '20px',
-                                                        '&:hover': {
-                                                            backgroundColor: 'grey',
-                                                            boxShadow: 'none',
-                                                        },
-                                                        '&:focus': {
-                                                            outline: 'none',
-                                                            boxShadow: 'none',
-                                                        }
-                                                    }}
-                                                    onClick={() => {
-                                                        history.push(`/item-details/${listState.id}`);
-                                                    }}
-                                                >
-                                                    View NFT listing
-                                                </Button>
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
-                                {/* 3 part */}
-                                <Box sx={{
-                                    marginTop: '1rem'
-                                }}>
-                                    {/* About collection */}
-                                    <Box>
-                                        <button style={{
-                                            display: 'flex',
-                                            height: '46px',
-                                            position: 'relative',
-                                            textAlign: 'left',
-                                            paddingTop: '0.5rem',
-                                            paddingBottom: '0.5rem',
-                                            borderWidth: '1px',
-                                            borderRadius: '0.5rem',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            width: '100%',
-                                            padding: '0',
-                                            lineHeight: 'inherit',
-                                            color: 'inherit',
-                                            backgroundColor: 'transparent',
-                                            backgroundImage: 'none',
-                                            fontFamily: 'inherit',
-                                            fontSize: '100%',
-                                            margin: '0'
-                                        }}>
-                                            <div style={{
-                                                display: 'flex',
-                                                paddingLeft: '1rem',
-                                                justifyContent: 'center',
-                                                alignItems: 'center'
-                                            }}>
-                                                <PersonOutline sx={{
-                                                    display: 'block',
-                                                    color: 'blue',
-                                                    verticalAlign: 'middle',
-                                                    width: '1.75rem',
-                                                    height: '1.75rem',
-                                                    marginRight: '0.5rem'
-                                                }} />
                                                 <span style={{
-                                                    fontWeight: '700',
-                                                    verticalAlign: 'middle'
-                                                }}>
-                                                    About {nftInfo.creator}
-                                                </span>
-                                            </div>
-                                            <span style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                marginLeft: '1.5rem',
-                                                marginRight: '0.5rem'
-                                            }}>
-                                                {/* <Add sx={{
-                                                    display: 'block',
-                                                    width: '1.75rem',
-                                                    height: '1.75rem',
-                                                    verticalAlign: 'middle',
-                                                    color: 'gray'
-                                                }} /> */}
-                                            </span>
-                                        </button>
-                                        <div style={{
-                                            paddingTop: '0.5rem',
-                                            paddingBottom: '0.5rem',
-                                            paddingLeft: '1.5rem',
-                                            paddingRight: '1.5rem',
-                                            backgroundColor: 'darksalmon',
-                                            borderWidth: '1px',
-                                            borderRadius: '0.5rem',
-                                            marginTop: '0.5rem',
-                                            marginBottom: '0.5rem',
-                                            fontWeight: '600',
-                                        }}>
-                                            {nftInfo.description}
-                                        </div>
-                                    </Box>
-                                    {/* About Attributes */}
-                                    <Box>
-                                        <button style={{
-                                            display: 'flex',
-                                            height: '46px',
-                                            position: 'relative',
-                                            textAlign: 'left',
-                                            paddingTop: '0.5rem',
-                                            paddingBottom: '0.5rem',
-                                            borderWidth: '1px',
-                                            borderRadius: '0.5rem',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            width: '100%',
-                                            padding: '0',
-                                            lineHeight: 'inherit',
-                                            color: 'inherit',
-                                            backgroundColor: 'transparent',
-                                            backgroundImage: 'none',
-                                            fontFamily: 'inherit',
-                                            fontSize: '100%',
-                                            margin: '0'
-                                        }}>
-                                            <div style={{
-                                                display: 'flex',
-                                                paddingLeft: '1rem',
-                                                justifyContent: 'center',
-                                                alignItems: 'center'
-                                            }}>
-                                                <EventNoteOutlined sx={{
-                                                    display: 'block',
-                                                    color: 'blue',
-                                                    verticalAlign: 'middle',
-                                                    width: '1.75rem',
-                                                    height: '1.75rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    marginLeft: '1.5rem',
                                                     marginRight: '0.5rem'
-                                                }} />
-                                                <span style={{
-                                                    fontWeight: '700',
-                                                    verticalAlign: 'middle'
                                                 }}>
-                                                    Attributes
+                                                    {/* <Add sx={{
+                                                        display: 'block',
+                                                        width: '1.75rem',
+                                                        height: '1.75rem',
+                                                        verticalAlign: 'middle',
+                                                        color: 'gray'
+                                                    }} /> */}
                                                 </span>
-                                            </div>
-                                            <span style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                marginLeft: '1.5rem',
-                                                marginRight: '0.5rem'
-                                            }}>
-                                                {/* <Add sx={{
-                                                    display: 'block',
-                                                    width: '1.75rem',
-                                                    height: '1.75rem',
-                                                    verticalAlign: 'middle',
-                                                    color: 'gray'
-                                                }} /> */}
-                                            </span>
-                                        </button>
-                                        <div style={{
-                                            display: 'grid',
-                                            gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
-                                            paddingTop: '0.25rem',
-                                            paddingBottom: '0.25rem',
-                                            paddingLeft: '0.5rem',
-                                            paddingRight: '0.5rem',
-                                            backgroundColor: 'darksalmon',
-                                            borderWidth: '1px',
-                                            borderRadius: '0.5rem',
-                                            marginTop: '0.5rem',
-                                            marginBottom: '0.5rem'
-                                        }}>
-                                            {
-                                                nftInfo.attributes.map((item, index) => {
-                                                    return <div key={index} style={{
-                                                        padding: '0.75rem',
-                                                        backgroundColor: 'black',
-                                                        borderRadius: '0.5rem',
-                                                        margin: '0.25rem'
-                                                    }}>
-                                                        <div style={{
-                                                            lineHeight: '1rem',
-                                                            marginBottom: '0.25rem',
-                                                            color: 'darkgray'
-                                                        }}>
-                                                            {item.trait_type}
-                                                        </div>
-                                                        <div style={{
-                                                            display: 'flex',
-                                                            flexWrap: 'wrap',
-                                                            rowGap: '0.25rem',
-                                                            columnGap: '1rem',
-                                                            color: 'whitesmoke'
-                                                        }}>
-                                                            {item.value}
-                                                        </div>
-                                                    </div>
-                                                })
-                                            }
-                                        </div>
-                                    </Box>
-                                    {/* About Details */}
-                                    <Box>
-                                        <button style={{
-                                            display: 'flex',
-                                            height: '46px',
-                                            position: 'relative',
-                                            textAlign: 'left',
-                                            paddingTop: '0.5rem',
-                                            paddingBottom: '0.5rem',
-                                            borderWidth: '1px',
-                                            borderRadius: '0.5rem',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            width: '100%',
-                                            padding: '0',
-                                            lineHeight: 'inherit',
-                                            color: 'inherit',
-                                            backgroundColor: 'transparent',
-                                            backgroundImage: 'none',
-                                            fontFamily: 'inherit',
-                                            fontSize: '100%',
-                                            margin: '0'
-                                        }}>
+                                            </button>
                                             <div style={{
-                                                display: 'flex',
-                                                paddingLeft: '1rem',
-                                                justifyContent: 'center',
-                                                alignItems: 'center'
+                                                paddingTop: '0.5rem',
+                                                paddingBottom: '0.5rem',
+                                                paddingLeft: '1.5rem',
+                                                paddingRight: '1.5rem',
+                                                backgroundColor: 'darksalmon',
+                                                borderWidth: '1px',
+                                                borderRadius: '0.5rem',
+                                                marginTop: '0.5rem',
+                                                marginBottom: '0.5rem',
+                                                fontWeight: '600',
                                             }}>
-                                                <EventNoteOutlined sx={{
-                                                    display: 'block',
-                                                    color: 'blue',
-                                                    verticalAlign: 'middle',
-                                                    width: '1.75rem',
-                                                    height: '1.75rem',
-                                                    marginRight: '0.5rem'
-                                                }} />
-                                                <span style={{
-                                                    fontWeight: '700',
-                                                    verticalAlign: 'middle'
-                                                }}>
-                                                    Details
-                                                </span>
+                                                {nftInfo.description}
                                             </div>
-                                            <span style={{
+                                        </Box>
+                                        {/* About Attributes */}
+                                        <Box>
+                                            <button style={{
                                                 display: 'flex',
+                                                height: '46px',
+                                                position: 'relative',
+                                                textAlign: 'left',
+                                                paddingTop: '0.5rem',
+                                                paddingBottom: '0.5rem',
+                                                borderWidth: '1px',
+                                                borderRadius: '0.5rem',
+                                                justifyContent: 'space-between',
                                                 alignItems: 'center',
-                                                marginLeft: '1.5rem',
-                                                marginRight: '0.5rem'
+                                                width: '100%',
+                                                padding: '0',
+                                                lineHeight: 'inherit',
+                                                color: 'inherit',
+                                                backgroundColor: 'transparent',
+                                                backgroundImage: 'none',
+                                                fontFamily: 'inherit',
+                                                fontSize: '100%',
+                                                margin: '0'
                                             }}>
-                                                {/* <Add sx={{
-                                                    display: 'block',
-                                                    width: '1.75rem',
-                                                    height: '1.75rem',
-                                                    verticalAlign: 'middle',
-                                                    color: 'gray'
-                                                }} /> */}
-                                            </span>
-                                        </button>
-                                        <div style={{
-                                            paddingTop: '0.5rem',
-                                            paddingBottom: '0.5rem',
-                                            paddingLeft: '1.5rem',
-                                            paddingRight: '1.5rem',
-                                            backgroundColor: 'darksalmon',
-                                            borderWidth: '1px',
-                                            borderRadius: '0.5rem',
-                                            marginTop: '0.5rem',
-                                            marginBottom: '0.5rem'
-                                        }}>
-                                            {
-                                                nftDetailInfo &&
-                                                nftDetailInfo.map((item, index) => {
-                                                    return <div key={index} style={{
-                                                        display: 'flex',
-                                                        position: 'relative',
-                                                        textAlign: 'left',
-                                                        paddingTop: '0.25rem',
-                                                        paddingBottom: '0.25rem',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center',
-                                                        width: '100%'
+                                                <div style={{
+                                                    display: 'flex',
+                                                    paddingLeft: '1rem',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center'
+                                                }}>
+                                                    <EventNoteOutlined sx={{
+                                                        display: 'block',
+                                                        color: 'blue',
+                                                        verticalAlign: 'middle',
+                                                        width: '1.75rem',
+                                                        height: '1.75rem',
+                                                        marginRight: '0.5rem'
+                                                    }} />
+                                                    <span style={{
+                                                        fontWeight: '700',
+                                                        verticalAlign: 'middle'
                                                     }}>
-                                                        <div style={{
-                                                            display: 'flex',
-                                                            fontWeight: '600',
-                                                            justifyContent: 'center',
-                                                            alignItems: 'center'
+                                                        Attributes
+                                                    </span>
+                                                </div>
+                                                <span style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    marginLeft: '1.5rem',
+                                                    marginRight: '0.5rem'
+                                                }}>
+                                                    {/* <Add sx={{
+                                                        display: 'block',
+                                                        width: '1.75rem',
+                                                        height: '1.75rem',
+                                                        verticalAlign: 'middle',
+                                                        color: 'gray'
+                                                    }} /> */}
+                                                </span>
+                                            </button>
+                                            <div style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
+                                                paddingTop: '0.25rem',
+                                                paddingBottom: '0.25rem',
+                                                paddingLeft: '0.5rem',
+                                                paddingRight: '0.5rem',
+                                                backgroundColor: 'darksalmon',
+                                                borderWidth: '1px',
+                                                borderRadius: '0.5rem',
+                                                marginTop: '0.5rem',
+                                                marginBottom: '0.5rem'
+                                            }}>
+                                                {
+                                                    nftInfo.attributes.map((item, index) => {
+                                                        return <div key={index} style={{
+                                                            padding: '0.75rem',
+                                                            backgroundColor: 'black',
+                                                            borderRadius: '0.5rem',
+                                                            margin: '0.25rem'
                                                         }}>
-                                                            {item.name}
+                                                            <div style={{
+                                                                lineHeight: '1rem',
+                                                                marginBottom: '0.25rem',
+                                                                color: 'darkgray'
+                                                            }}>
+                                                                {item.trait_type}
+                                                            </div>
+                                                            <div style={{
+                                                                display: 'flex',
+                                                                flexWrap: 'wrap',
+                                                                rowGap: '0.25rem',
+                                                                columnGap: '1rem',
+                                                                color: 'whitesmoke'
+                                                            }}>
+                                                                {item.value}
+                                                            </div>
                                                         </div>
-                                                        <span style={{
+                                                    })
+                                                }
+                                            </div>
+                                        </Box>
+                                        {/* About Details */}
+                                        <Box>
+                                            <button style={{
+                                                display: 'flex',
+                                                height: '46px',
+                                                position: 'relative',
+                                                textAlign: 'left',
+                                                paddingTop: '0.5rem',
+                                                paddingBottom: '0.5rem',
+                                                borderWidth: '1px',
+                                                borderRadius: '0.5rem',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                width: '100%',
+                                                padding: '0',
+                                                lineHeight: 'inherit',
+                                                color: 'inherit',
+                                                backgroundColor: 'transparent',
+                                                backgroundImage: 'none',
+                                                fontFamily: 'inherit',
+                                                fontSize: '100%',
+                                                margin: '0'
+                                            }}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    paddingLeft: '1rem',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center'
+                                                }}>
+                                                    <EventNoteOutlined sx={{
+                                                        display: 'block',
+                                                        color: 'blue',
+                                                        verticalAlign: 'middle',
+                                                        width: '1.75rem',
+                                                        height: '1.75rem',
+                                                        marginRight: '0.5rem'
+                                                    }} />
+                                                    <span style={{
+                                                        fontWeight: '700',
+                                                        verticalAlign: 'middle'
+                                                    }}>
+                                                        Details
+                                                    </span>
+                                                </div>
+                                                <span style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    marginLeft: '1.5rem',
+                                                    marginRight: '0.5rem'
+                                                }}>
+                                                    {/* <Add sx={{
+                                                        display: 'block',
+                                                        width: '1.75rem',
+                                                        height: '1.75rem',
+                                                        verticalAlign: 'middle',
+                                                        color: 'gray'
+                                                    }} /> */}
+                                                </span>
+                                            </button>
+                                            <div style={{
+                                                paddingTop: '0.5rem',
+                                                paddingBottom: '0.5rem',
+                                                paddingLeft: '1.5rem',
+                                                paddingRight: '1.5rem',
+                                                backgroundColor: 'darksalmon',
+                                                borderWidth: '1px',
+                                                borderRadius: '0.5rem',
+                                                marginTop: '0.5rem',
+                                                marginBottom: '0.5rem'
+                                            }}>
+                                                {
+                                                    nftDetailInfo &&
+                                                    nftDetailInfo.map((item, index) => {
+                                                        return <div key={index} style={{
                                                             display: 'flex',
+                                                            position: 'relative',
+                                                            textAlign: 'left',
+                                                            paddingTop: '0.25rem',
+                                                            paddingBottom: '0.25rem',
+                                                            justifyContent: 'space-between',
                                                             alignItems: 'center',
-                                                            marginLeft: '1.5rem',
-                                                            color: 'unset',
-                                                            fontWeight: '600',
+                                                            width: '100%'
                                                         }}>
-                                                            {item.value}
-                                                        </span>
-                                                    </div>
-                                                })
-                                            }
-                                        </div>
+                                                            <div style={{
+                                                                display: 'flex',
+                                                                fontWeight: '600',
+                                                                justifyContent: 'center',
+                                                                alignItems: 'center'
+                                                            }}>
+                                                                {item.name}
+                                                            </div>
+                                                            <span style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                marginLeft: '1.5rem',
+                                                                color: 'unset',
+                                                                fontWeight: '600',
+                                                            }}>
+                                                                {item.value}
+                                                            </span>
+                                                        </div>
+                                                    })
+                                                }
+                                            </div>
+                                        </Box>
                                     </Box>
-                                </Box>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </Paper>
-                </Box>
-            }
+                        </Paper>
+                    </Box>
+                }
+            </div>
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                 open={loadingView}

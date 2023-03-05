@@ -14,6 +14,12 @@ export const IPFS_URL = "https://hashpack.b-cdn.net/ipfs/";
 
 export const COINGECKO_URL = "https://api.coingecko.com";
 
+export const SERVER_URL = "http://95.217.63.153:3306";
+export const IMG_URL = "http://95.217.63.153:3306/images";
+
+// export const SERVER_URL = "https://degenland.tech:3306";
+// export const IMG_URL = "https://degenland.tech:3306/images";
+
 export const DEGENLAND_NFT_ID = "0.0.1783975";
 export const TYCOON_NFT_ID = "0.0.1467455";
 export const MOGUL_NFT_ID = "0.0.1467309";
