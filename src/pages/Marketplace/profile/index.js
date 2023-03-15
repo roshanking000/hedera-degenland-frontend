@@ -14,7 +14,9 @@ import {
     CircularProgress,
     Box,
     Tab,
-    Pagination
+    Pagination,
+    ToggleButton,
+    ToggleButtonGroup,
 } from '@mui/material';
 
 import {
@@ -40,32 +42,43 @@ export default function Profile() {
     let history = useHistory();
     const [loadingView, setLoadingView] = useState(false);
     const [profileData, setProfileData] = useState(null);
-    const [walletNftInfo, setWalletNftInfo] = useState(null);
-    const [listingNftInfo, setListingNftInfo] = useState(null);
+    const [unlistedNfts, setUnlistedNfts] = useState(null);
+    const [listedNfts, setListedNfts] = useState(null);
+    const [allNfts, setAllNfts] = useState(null);
     const [collectionList, setCollectionList] = useState(null);
 
     const [nftPageIndex, setNftPageIndex] = useState(1);
     const [currentPageNftList, setCurrentPageNftList] = useState([]);
     const [alertInfo, setAlertInfo] = useState([]);
 
+    const [alignment, setAlignment] = useState('Unlisted NFTs');
+    const [buttonClick, setButtonClick] = useState(true);
+
     const [tabValue, setTabValue] = useState('Owned');
+
+    const handleChange = (event, newAlignment) => {
+        setAlignment(newAlignment);
+        if (newAlignment == 'Unlisted NFTs') {
+            setButtonClick(true);
+            resetNftListToDisplay(1, unlistedNfts);
+        }
+        else if (newAlignment == 'All NFTs') {
+            setButtonClick(false);
+            resetNftListToDisplay(1, allNfts);
+        }
+    };
 
     useEffect(() => {
         if (accountIds?.length > 0) {
             getProfileData(accountIds[0]);
-            getWalletMyNftData(accountIds[0]);
+            getNftList();
         }
     }, [accountIds]);
 
     useEffect(() => {
-        if (walletNftInfo)
-            resetNftListToDisplay(1, walletNftInfo);
-    }, [walletNftInfo]);
-
-    useEffect(() => {
-        if (listingNftInfo)
-            resetNftListToDisplay(1, listingNftInfo);
-    }, [listingNftInfo]);
+        if (unlistedNfts)
+            resetNftListToDisplay(1, unlistedNfts);
+    }, [unlistedNfts]);
 
     const resetNftListToDisplay = (pageIndex_, nftList_) => {
         let _startIndex = (pageIndex_ - 1) * pagenationDisplayCount;
@@ -90,19 +103,59 @@ export default function Profile() {
         setProfileData(_res.data);
     }
 
-    // load nfts info
-    const getWalletMyNftData = async (accountId_) => {
+    const getNftList = async () => {
+        setLoadingView(true);
+        let nftList = [];
+        // get listed nft list
+        const _listedListRes = await getRequest(env.SERVER_URL + "/api/marketplace/get_list_by_accountid?accountId=" + accountIds[0]);
+        if (!_listedListRes) {
+            toast.error("Something wrong with server!");
+            setLoadingView(false);
+            return;
+        }
+        if (!_listedListRes.result) {
+            toast.error(_listedListRes.error);
+            setLoadingView(false);
+            return;
+        }
+
+        // get auction nft list
+        const _auctionRes = await getRequest(env.SERVER_URL + "/api/auctions/get_list_by_accountid?accountId=" + accountIds[0]);
+        if (!_auctionRes) {
+            toast.error("Something wrong with server!");
+            setLoadingView(false);
+            return;
+        }
+        if (!_auctionRes.result) {
+            toast.error(_auctionRes.error);
+            setLoadingView(false);
+            return;
+        }
+        const _listedNftData = _listedListRes.data.concat(_auctionRes.data);
+        for (let i = 0; i < _listedNftData.length; i++) {
+            const data = {
+                token_id: _listedNftData[i].token_id,
+                serial_number: _listedNftData[i].serial_number,
+                name: _listedNftData[i].name,
+                creator: _listedNftData[i].creator,
+                imageUrl: _listedNftData[i].imageUrl,
+            }
+            nftList.push(data);
+        }
+        setListedNfts(nftList);
+
+        // get unlisted nft list
         let _nextLink = null;
         let _newWalletNftInfo = [];
 
-        let _WNinfo = await getRequest(env.MIRROR_NET_URL + "/api/v1/accounts/" + accountId_ + "/nfts");
+        let _WNinfo = await getRequest(env.MIRROR_NET_URL + "/api/v1/accounts/" + accountIds[0] + "/nfts");
         if (!_WNinfo) {
             toast.error("Something wrong with network!");
             setLoadingView(false);
             return;
         }
 
-        if (_WNinfo && _WNinfo.nfts.length > 0)
+        if (_WNinfo.nfts && _WNinfo.nfts.length > 0)
             _nextLink = _WNinfo.links.next;
 
         while (1) {
@@ -125,10 +178,11 @@ export default function Profile() {
 
             _WNinfo = await getRequest(env.MIRROR_NET_URL + _nextLink);
             _nextLink = null;
-            if (_WNinfo && _WNinfo.nfts.length > 0)
+            if (_WNinfo.nfts && _WNinfo.nfts.length > 0)
                 _nextLink = _WNinfo.links.next;
         }
-        setWalletNftInfo(_newWalletNftInfo);
+        setUnlistedNfts(_newWalletNftInfo);
+        setAllNfts(_newWalletNftInfo.concat(nftList));
         setLoadingView(false);
     }
 
@@ -156,28 +210,11 @@ export default function Profile() {
         return { result: false };
     }
 
-    const getNftListing = async () => {
-        setLoadingView(true);
-        const _res = await getRequest(env.SERVER_URL + "/api/marketplace/get_list_by_accountid?accountId=" + accountIds[0]);
-        if (!_res) {
-            toast.error("Something wrong with server!");
-            setLoadingView(false);
-            return;
-        }
-        if (!_res.result) {
-            toast.error(_res.error);
-            setLoadingView(false);
-            return;
-        }
-        setListingNftInfo(_res.data);
-        setLoadingView(false);
-    }
-
     const getCollectionListing = async () => {
         let _collectionList = [];
-        for (let i = 0; i < walletNftInfo.length; i++) {
-            let _creator = walletNftInfo[i].creator;
-            let _imageUrl = walletNftInfo[i].imageUrl;
+        for (let i = 0; i < allNfts.length; i++) {
+            let _creator = allNfts[i].creator;
+            let _imageUrl = allNfts[i].imageUrl;
             let _flag = 0;
             for (let j = 0; j < _collectionList.length; j++) {
                 if (_creator == _collectionList[j].creator)
@@ -190,7 +227,6 @@ export default function Profile() {
                 });
             }
         }
-        console.log(_collectionList);
         setCollectionList(_collectionList);
     }
 
@@ -209,9 +245,9 @@ export default function Profile() {
         setCurrentPageNftList([]);
         setTabValue(newValue);
         if (newValue == 'Owned')
-            resetNftListToDisplay(1, walletNftInfo);
+            resetNftListToDisplay(1, unlistedNfts);
         else if (newValue == 'Listings')
-            getNftListing();
+            resetNftListToDisplay(1, listedNfts);
         else if (newValue == 'Collections')
             getCollectionListing();
     };
@@ -326,7 +362,27 @@ export default function Profile() {
                                     <Tab label="Collections" value="Collections" />
                                 </TabList>
                             </Box>
-                            <TabPanel value="Owned">
+                            <TabPanel className='flex flex-column' value="Owned">
+                                <div className="flex justify-end space-x-2 lg:space-x-3">
+                                    <ToggleButtonGroup
+                                        color="primary"
+                                        value={alignment}
+                                        exclusive
+                                        onChange={handleChange}
+                                        aria-label="Platform"
+                                    >
+                                        <ToggleButton value="Unlisted NFTs" sx={{
+                                            '&:focus': {
+                                                outline: 'none',
+                                            }
+                                        }}>Unlisted NFTs</ToggleButton>
+                                        <ToggleButton value="All NFTs" sx={{
+                                            '&:focus': {
+                                                outline: 'none',
+                                            }
+                                        }}>All NFTs</ToggleButton>
+                                    </ToggleButtonGroup>
+                                </div>
                                 <Box sx={{
                                     display: 'flex',
                                     flexDirection: 'column',
@@ -368,7 +424,7 @@ export default function Profile() {
                                     </Box>
                                     <Box>
                                         {
-                                            walletNftInfo?.length > 0 &&
+                                            unlistedNfts?.length > 0 &&
                                             <div style={{
                                                 display: 'flex',
                                                 flexDirection: 'row',
@@ -390,10 +446,10 @@ export default function Profile() {
                                                     }}
                                                     page={nftPageIndex}
                                                     onChange={(event, value) => {
-                                                        resetNftListToDisplay(value, walletNftInfo);
+                                                        resetNftListToDisplay(value, unlistedNfts);
                                                         setNftPageIndex(value);
                                                     }}
-                                                    count={parseInt(walletNftInfo.length / pagenationDisplayCount) + (walletNftInfo.length % pagenationDisplayCount !== 0 ? 1 : 0)}
+                                                    count={parseInt(unlistedNfts.length / pagenationDisplayCount) + (unlistedNfts.length % pagenationDisplayCount !== 0 ? 1 : 0)}
                                                     variant="outlined" />
                                             </div>
                                         }
@@ -442,7 +498,7 @@ export default function Profile() {
                                     </Box>
                                     <Box>
                                         {
-                                            listingNftInfo?.length > 0 &&
+                                            listedNfts?.length > 0 &&
                                             <div style={{
                                                 display: 'flex',
                                                 flexDirection: 'row',
@@ -464,10 +520,10 @@ export default function Profile() {
                                                     }}
                                                     page={nftPageIndex}
                                                     onChange={(event, value) => {
-                                                        resetNftListToDisplay(value, listingNftInfo);
+                                                        resetNftListToDisplay(value, listedNfts);
                                                         setNftPageIndex(value);
                                                     }}
-                                                    count={parseInt(listingNftInfo.length / pagenationDisplayCount) + (listingNftInfo.length % pagenationDisplayCount !== 0 ? 1 : 0)}
+                                                    count={parseInt(listedNfts.length / pagenationDisplayCount) + (listedNfts.length % pagenationDisplayCount !== 0 ? 1 : 0)}
                                                     variant="outlined" />
                                             </div>
                                         }

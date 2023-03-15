@@ -91,7 +91,6 @@ export default function HashConnectProvider({
 }: PropsType) {
   //Saving Wallet Details in Ustate
   const [saveData, SetSaveData] = useState<SaveData>(INITIAL_SAVE_DATA);
-  console.log("------------", saveData);
   const [installedExtensions, setInstalledExtensions] =
     useState<HashConnectTypes.WalletMetadata | null>(null);
 
@@ -122,10 +121,6 @@ export default function HashConnectProvider({
         //find any supported local wallets
         hashConnect.findLocalWallets();
       } else {
-        console.log("====Local data found====", localData);
-
-        console.log("====localData to save1====");
-
         await SetSaveData((prevData) => ({ ...prevData, ...localData }));
 
         await hashConnect.init(APP_CONFIG, localData.privateKey);
@@ -137,20 +132,12 @@ export default function HashConnectProvider({
       if (localData) {
         SetSaveData((prevData) => ({ ...prevData, ...localData }));
       } else {
-        console.log("************************ saveData 1 : ", saveData);
         SetSaveData((prevData) => ({ ...prevData, ...saveData }));
-      }
-      if (debug) {
-        console.log(saveData);
-        console.log("====Wallet details updated to state====");
       }
     }
   };
 
   const saveDataInLocalStorage = async (data: MessageTypes.ApprovePairing) => {
-    if (debug) console.info("===============Saving to localstorage::=============");
-    console.log("************************ saveData 3 : ", saveData);
-    console.log("************************ data : ", data);
     const { metadata, ...restData } = data;
     SetSaveData((prevSaveData) => {
       prevSaveData.pairedWalletData = metadata;
@@ -159,7 +146,6 @@ export default function HashConnectProvider({
     data["privateKey"] = saveData.privateKey;
     data["pairingString"] = saveData.pairingString;
     data["pairedWalletData"] = metadata;
-    console.log("************************ hashConnectData : ", data);
     let dataToSave = JSON.stringify(data);
     localStorage.setItem("hashConnectData", dataToSave);
   };
@@ -180,8 +166,6 @@ export default function HashConnectProvider({
   };
 
   const pairingEventHandler = (data: MessageTypes.ApprovePairing) => {
-    if (debug) console.log("====pairingEvent:::Wallet connected=====", data);
-    console.log("************************ saveData 2 : ", saveData);
     // Save Data to localStorage
     saveDataInLocalStorage(data);
   };
@@ -213,8 +197,6 @@ export default function HashConnectProvider({
 
   const connect = () => {
     if (installedExtensions) {
-      if (debug) console.log("Pairing String::", saveData.pairingString);
-      // console.log("Glinton HashConnect Test >>>>> saveData.pairingString :", saveData.pairingString);
       hashConnect.connectToLocalWallet(saveData.pairingString);
     } else {
       // if (debug) console.log("====No Extension is not in browser====");
@@ -434,7 +416,7 @@ export default function HashConnectProvider({
     const _accountId = saveData.accountIds[0];
     const _provider = hashConnect.getProvider(netWork, saveData.topic, _accountId);
     const _signer = hashConnect.getSigner(_provider);
-    const _treasuryId = AccountId.fromString(env.TREASURY_ID_RAFFLE);
+    const _treasuryId = AccountId.fromString(env.TREASURY_ID);
     const _nft = new NftId(TokenId.fromString(tokenId_), parseInt(serialNum_));
 
     const allowanceTx = new TransferTransaction()
@@ -446,7 +428,6 @@ export default function HashConnectProvider({
     const allowanceSubmit = await allowanceSign.executeWithSigner(_signer);
     if (!allowanceSubmit) return false;
     const allowanceRx = await _provider.getTransactionReceipt(allowanceSubmit.transactionId);
-    console.log("************************ receiveNft 1 : ", allowanceRx);
 
     if (allowanceRx.status._code === 22)
       return true;
@@ -481,7 +462,6 @@ export default function HashConnectProvider({
   }
 
   const receiveMultipleNfts = async (nftInfo_, hbarAmount_, palAmount_) => {
-    console.log("receiveMultipleNfts log ", saveData);
     const _accountId = saveData.accountIds[0];
     const _provider = hashConnect.getProvider(netWork, saveData.topic, _accountId);
     const _signer = hashConnect.getSigner(_provider);
@@ -513,7 +493,6 @@ export default function HashConnectProvider({
     const allowanceSubmit = await allowanceSign.executeWithSigner(_signer);
     if (!allowanceSubmit) return false;
     const allowanceRx = await _provider.getTransactionReceipt(allowanceSubmit.transactionId);
-    console.log("************************ receiveMultipleNfts 1 : ", allowanceRx);
 
     if (allowanceRx.status._code === 22)
       return true;
@@ -527,7 +506,6 @@ export default function HashConnectProvider({
     const _signer = hashConnect.getSigner(_provider);
     const _treasuryId = AccountId.fromString(env.TREASURY_ID);
 
-    console.log("sendHbarAndMultiNftsToTreasury log - ", hbarAmount_);
     const _hbar = new Hbar(hbarAmount_);
 
     let allowanceTx;
@@ -547,7 +525,6 @@ export default function HashConnectProvider({
       const _nft = new NftId(TokenId.fromString(nftInfo_[i].tokenId), parseInt(nftInfo_[i].serialNum));
       allowanceTx.approveTokenNftAllowance(_nft, _accountId, _treasuryId);
     }
-    console.log("--------------");
     if (!allowanceTx) return false;
     const allowanceFreeze = await allowanceTx.freezeWithSigner(_signer);
     if (!allowanceFreeze) return false;
@@ -557,7 +534,6 @@ export default function HashConnectProvider({
     if (!allowanceSubmit) return false;
     const allowanceRx = await _provider.getTransactionReceipt(allowanceSubmit.transactionId);
 
-    console.log(allowanceRx.status._code);
     if (allowanceRx.status._code === 22)
       return true;
 

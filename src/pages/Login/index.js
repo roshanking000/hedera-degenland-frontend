@@ -272,7 +272,7 @@ function Login() {
     }
 
     const handleMarketplaceLogin = () => {
-        history.push('/marketplace');
+        history.push('/marketplace/1');
     }
 
     //--------------------------------------------------------------------------------------------------

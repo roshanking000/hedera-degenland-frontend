@@ -56,7 +56,6 @@ export default function Collections() {
                 setLoadingView(false);
                 return;
             }
-            console.log(_res.data);
             setCollectionList(_res.data);
             setLoadingView(false);
         }
@@ -126,6 +125,9 @@ export default function Collections() {
                                                     cursor: 'pointer',
                                                     opacity: '70%',
                                                 },
+                                            }}
+                                            onClick={async () => {
+                                                history.push(`/collection/${item.collectionName}`);
                                             }}
                                         >
                                             <div style={{

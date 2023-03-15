@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
-import { styled, useTheme } from '@mui/material/styles';
-
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -38,7 +36,7 @@ export default function ItemDetail() {
     const { id } = useParams();
     let history = useHistory();
 
-    const { walletData, buyNFT, deleteAllowanceNft, autoNFTAssociate } = useHashConnect();
+    const { walletData, buyNFT, autoNFTAssociate, receiveNft } = useHashConnect();
     const { accountIds } = walletData;
 
     const [loadingView, setLoadingView] = useState(false);
@@ -478,9 +476,30 @@ export default function ItemDetail() {
                                             }}>
                                                 <Button onClick={async () => {
                                                     setLoadingView(true);
-                                                    const _res = await deleteAllowanceNft(itemDetailInfo.token_id, itemDetailInfo.serial_number);
-                                                    if (!_res) {
-                                                        toast.error("Error! The transaction was rejected, or failed!");
+
+                                                    // approve allowance nft
+                                                    const _allowanceData = {
+                                                        account_id: accountIds[0],
+                                                        token_id: itemDetailInfo.token_id,
+                                                        serial_number: itemDetailInfo.serial_number
+                                                    };
+
+                                                    const _allowanceRes = await postRequest(env.SERVER_URL + "/api/marketplace/allowance_nft", _allowanceData);
+                                                    if (!_allowanceRes) {
+                                                        toast.error("Something wrong with server!");
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+                                                    if (!_allowanceRes.result) {
+                                                        toast.error(_allowanceRes.error);
+                                                        setLoadingView(false);
+                                                        return;
+                                                    }
+
+                                                    // fetch nft
+                                                    const _receiveRes = await receiveNft(itemDetailInfo.token_id, itemDetailInfo.serial_number);
+                                                    if (!_receiveRes) {
+                                                        toast.error("Error! The transaction was rejected, or failed! Please try again!");
                                                         setLoadingView(false);
                                                         return;
                                                     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 
 import { styled, useTheme } from '@mui/material/styles';
 
@@ -28,45 +28,40 @@ import NFTCard from "../../../components/NFTCard";
 const pagenationDisplayCount = 24;
 
 export default function Marketplace() {
+    const { page_number } = useParams();
+    console.log(page_number);
+
     const { walletData } = useHashConnect();
     const { accountIds } = walletData;
 
     let history = useHistory();
     const [loadingView, setLoadingView] = useState(false);
+    const [totalListCount, setTotalListCount] = useState(false);
     const [nftList, setNftList] = useState(null);
     const [nftPageIndex, setNftPageIndex] = useState(1);
     const [currentPageNftList, setCurrentPageNftList] = useState([]);
     const [alertInfo, setAlertInfo] = useState([]);
 
     useEffect(() => {
-        const getNftList = async () => {
-            setLoadingView(true);
-            const _res = await getRequest(env.SERVER_URL + "/api/marketplace/get_list");
-            if (!_res) {
-                toast.error("Something wrong with server!");
-                setLoadingView(false);
-                return;
-            }
-            if (!_res.result) {
-                toast.error(_res.error);
-                setLoadingView(false);
-                return;
-            }
-            setNftList(_res.data);
-            setLoadingView(false);
-        }
         getNftList();
-    }, []);
+    }, [page_number]);
 
-    useEffect(() => {
-        if (nftList)
-            resetNftListToDisplay(1, nftList);
-    }, [nftList]);
-
-    const resetNftListToDisplay = (pageIndex_, nftList_) => {
-        let _startIndex = (pageIndex_ - 1) * pagenationDisplayCount;
-        let _endIndex = pageIndex_ * pagenationDisplayCount > nftList_.length ? nftList_.length : pageIndex_ * pagenationDisplayCount;
-        setCurrentPageNftList(nftList_.slice(_startIndex, _endIndex));
+    const getNftList = async () => {
+        setLoadingView(true);
+        const _res = await getRequest(env.SERVER_URL + "/api/marketplace/get_list?pageNumber=" + page_number + "&displayCount=" + pagenationDisplayCount);
+        if (!_res) {
+            toast.error("Something wrong with server!");
+            setLoadingView(false);
+            return;
+        }
+        if (!_res.result) {
+            toast.error(_res.error);
+            setLoadingView(false);
+            return;
+        }
+        setNftList(_res.data);
+        setTotalListCount(_res.totalCount);
+        setLoadingView(false);
     }
 
     return (
@@ -216,7 +211,7 @@ export default function Marketplace() {
                         </div>
                         <Box>
                             {
-                                currentPageNftList?.length == 0 &&
+                                nftList?.length == 0 &&
                                 <p style={{
                                     fontSize: 13,
                                     fontWeight: 700,
@@ -229,8 +224,8 @@ export default function Marketplace() {
                                 </p>
                             }
                             {
-                                currentPageNftList?.length > 0 &&
-                                currentPageNftList.map((item, index) => {
+                                nftList?.length > 0 &&
+                                nftList.map((item, index) => {
                                     return <Box key={index}
                                         sx={{
                                             display: 'flex',
@@ -251,7 +246,7 @@ export default function Marketplace() {
                         </Box>
                         <Box>
                             {
-                                nftList?.length > 0 &&
+                                totalListCount > 0 &&
                                 <div style={{
                                     display: 'flex',
                                     flexDirection: 'row',
@@ -272,11 +267,11 @@ export default function Marketplace() {
                                             },
                                         }}
                                         page={nftPageIndex}
-                                        onChange={(event, value) => {
-                                            resetNftListToDisplay(value, nftList);
-                                            setNftPageIndex(value);
+                                        onChange={async (event, value) => {
+                                            setNftList(null);
+                                            history.push(`/marketplace/${value}`);
                                         }}
-                                        count={parseInt(nftList.length / pagenationDisplayCount) + (nftList.length % pagenationDisplayCount !== 0 ? 1 : 0)}
+                                        count={parseInt(totalListCount / pagenationDisplayCount) + (totalListCount % pagenationDisplayCount !== 0 ? 1 : 0)}
                                         variant="outlined" />
                                 </div>
                             }

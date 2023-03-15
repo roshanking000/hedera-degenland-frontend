@@ -17,6 +17,7 @@ import {
     LocalGroceryStoreOutlined,
     LeaderboardOutlined,
     CollectionsOutlined,
+    AutoAwesomeMosaicOutlined,
 } from '@mui/icons-material';
 
 export default function NavBar() {
@@ -108,6 +109,22 @@ export default function NavBar() {
                                     fontSize: '14px',
                                     fontWeight: '500',
                                 }}>Marketplace</p>
+                            </Box>
+                            <Box sx={APPBAR_STYLE} onClick={() => history.push('/auctions')}>
+                                <AutoAwesomeMosaicOutlined fontSize='medium' sx={{
+                                    display: 'block',
+                                    verticalAlign: 'middle',
+                                    color: 'rgba(156,163,175,1)',
+                                    flexShrink: 0,
+                                    width: '1.5rem',
+                                    height: '1.5rem',
+                                }} />
+                                <p style={{
+                                    margin: 0,
+                                    marginLeft: '15px',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                }}>Auctions</p>
                             </Box>
                             <Box sx={APPBAR_STYLE} onClick={() => history.push('/collections')}>
                                 <CollectionsOutlined fontSize='medium' sx={{

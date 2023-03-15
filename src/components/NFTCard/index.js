@@ -35,7 +35,7 @@ function NFTCard({
                     }} autoPlay loop>
                         <source src={nftInfo.imageUrl} />
                     </video>
-                    <img alt='' src={nftInfo.imageUrl} style={{
+                    <img alt='' loading='lazy' src={nftInfo.imageUrl} style={{
                         width: '244px',
                         borderRadius: '0.375rem',
                         height: '244px',
@@ -111,6 +111,19 @@ function NFTCard({
                         }}>
                             {nftInfo.price} ℏ
                         </p>
+                    </div>
+                }
+                {
+                    nftInfo.start_auction_price != null && nftInfo.current_auction_price != null &&
+                    <div>
+                        <div className='text-left sm:flex justify-between items-center mt-1 truncate'>
+                            <p className='text-purple-900 text-sm font-medium pl-3 mb-0'>Starting price</p>
+                            <p className='text-purple-500 line-through text-md font-bold sm:pr-3 pl-3 mb-0'>{nftInfo.start_auction_price} ℏ</p>
+                        </div>
+                        <div className='text-left sm:flex justify-between items-center mt-1 truncate'>
+                            <p className='text-purple-900 text-sm font-medium pl-3 mb-0'>Current price</p>
+                            <p className='text-purple-900 text-md font-bold sm:pr-3 pl-3 mb-0'>{nftInfo.current_auction_price} ℏ</p>
+                        </div>
                     </div>
                 }
                 {

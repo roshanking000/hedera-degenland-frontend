@@ -370,7 +370,7 @@ export default function Sold() {
                                                                 </div>
                                                             </TableCell>
                                                             <TableCell sx={{ fontSize: '1rem' }} align="left">{item.soldTime}</TableCell>
-                                                            <TableCell sx={{ fontSize: '1rem' }} align="left">{item.totalAmount}</TableCell>
+                                                            <TableCell sx={{ fontSize: '1rem' }} align="left">{item.totalAmount} ℏ</TableCell>
                                                             <TableCell sx={{ fontSize: '1rem' }} align="left">{item.buyer}</TableCell>
                                                             <TableCell sx={{ fontSize: '1rem' }} align="left">{item.seller}</TableCell>
                                                         </TableRow>
