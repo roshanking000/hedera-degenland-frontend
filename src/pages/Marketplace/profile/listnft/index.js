@@ -342,7 +342,7 @@ export default function ListNFT() {
 
                                                         const associateFee = 1;
                                                         const _hbarAmount = associateFee + fallbackFee;
-                                                        const _approveResult = await sendHbarAndNftToTreasury(_hbarAmount, token_id, serial_number);
+                                                        const _approveResult = await sendHbarAndNftToTreasury(0, token_id, serial_number);
 
                                                         if (!_approveResult) {
                                                             toast.error("Error! The transaction was rejected, or failed! Please try again!");
@@ -909,7 +909,7 @@ export default function ListNFT() {
                     }}>
                         <Button onClick={() => {
                             setAuctionDlgViewFlag(false);
-                            onClickAuction();
+//                            onClickAuction();
                         }}
                             sx={{
                                 height: '42px',
@@ -930,7 +930,7 @@ export default function ListNFT() {
                                     boxShadow: 'none',
                                 }
                             }}>
-                            Start Auction
+                            Coming Soon{/*Start Auction*/}
                         </Button>
                         <Button onClick={() => {
                             setAuctionDlgViewFlag(false);
