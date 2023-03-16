@@ -94,7 +94,7 @@ export default function NavBar() {
                             paddingRight: '0.5rem',
                             flex: '1 1 0%',
                         }}>
-                            <Box sx={APPBAR_STYLE} onClick={() => history.push('/marketplace')}>
+                            <Box sx={APPBAR_STYLE} onClick={() => history.push('/marketplace/1')}>
                                 <LocalGroceryStoreOutlined fontSize='medium' sx={{
                                     display: 'block',
                                     verticalAlign: 'middle',

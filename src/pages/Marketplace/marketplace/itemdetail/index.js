@@ -522,7 +522,7 @@ export default function ItemDetail() {
                                                         return;
                                                     }
                                                     setLoadingView(false);
-                                                    history.push('/marketplace');
+                                                    history.push('/marketplace/1');
                                                 }}
                                                     variant='outlined'
                                                     sx={{
@@ -1127,7 +1127,7 @@ export default function ItemDetail() {
                             padding: 0,
                         }}>
                             <Button onClick={async () => {
-                                history.push('/marketplace');
+                                history.push('/marketplace/1');
                             }}
                                 variant='outlined'
                                 sx={{
