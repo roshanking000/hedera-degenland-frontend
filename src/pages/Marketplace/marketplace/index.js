@@ -29,7 +29,6 @@ const pagenationDisplayCount = 24;
 
 export default function Marketplace() {
     const { page_number } = useParams();
-    console.log(page_number);
 
     const { walletData } = useHashConnect();
     const { accountIds } = walletData;

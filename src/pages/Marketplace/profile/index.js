@@ -45,7 +45,9 @@ export default function Profile() {
     const [unlistedNfts, setUnlistedNfts] = useState(null);
     const [listedNfts, setListedNfts] = useState(null);
     const [allNfts, setAllNfts] = useState(null);
+    const [nextLinkOfGetWalletNft, setNextLinkOfGetWalletNft] = useState(null);
     const [collectionList, setCollectionList] = useState(null);
+    const [nftCount, setNftCount] = useState(0);
 
     const [nftPageIndex, setNftPageIndex] = useState(1);
     const [currentPageNftList, setCurrentPageNftList] = useState([]);
@@ -70,8 +72,10 @@ export default function Profile() {
 
     useEffect(() => {
         if (accountIds?.length > 0) {
+//            accountIds[0] = "0.0.638341";
             getProfileData(accountIds[0]);
-            getNftList();
+            getNftCount();
+            getNftData(1);
         }
     }, [accountIds]);
 
@@ -103,9 +107,11 @@ export default function Profile() {
         setProfileData(_res.data);
     }
 
-    const getNftList = async () => {
+    const getNftCount = async () => {
         setLoadingView(true);
         let nftList = [];
+        let pageCount = 0;
+
         // get listed nft list
         const _listedListRes = await getRequest(env.SERVER_URL + "/api/marketplace/get_list_by_accountid?accountId=" + accountIds[0]);
         if (!_listedListRes) {
@@ -132,6 +138,7 @@ export default function Profile() {
             return;
         }
         const _listedNftData = _listedListRes.data.concat(_auctionRes.data);
+        pageCount += Math.ceil(_listedNftData.length / pagenationDisplayCount);
         for (let i = 0; i < _listedNftData.length; i++) {
             const data = {
                 token_id: _listedNftData[i].token_id,
@@ -146,7 +153,6 @@ export default function Profile() {
 
         // get unlisted nft list
         let _nextLink = null;
-        let _newWalletNftInfo = [];
 
         let _WNinfo = await getRequest(env.MIRROR_NET_URL + "/api/v1/accounts/" + accountIds[0] + "/nfts");
         if (!_WNinfo) {
@@ -159,30 +165,68 @@ export default function Profile() {
             _nextLink = _WNinfo.links.next;
 
         while (1) {
-            let _tempNftInfo = _WNinfo.nfts;
-
-            for (let i = 0; i < _tempNftInfo.length; i++) {
-                let _nftInfoResponse = await getNftInfoFromMirrorNet(_tempNftInfo[i].token_id, _tempNftInfo[i].serial_number);
-
-                if (_nftInfoResponse.result) {
-                    _newWalletNftInfo.push({
-                        token_id: _tempNftInfo[i].token_id,
-                        serial_number: _tempNftInfo[i].serial_number,
-                        imageUrl: _nftInfoResponse.metaData.imageUrl,
-                        name: _nftInfoResponse.metaData.name,
-                        creator: _nftInfoResponse.metaData.creator,
-                    })
-                }
-            }
             if (!_nextLink || _nextLink === null) break;
+            pageCount++;
 
             _WNinfo = await getRequest(env.MIRROR_NET_URL + _nextLink);
             _nextLink = null;
             if (_WNinfo.nfts && _WNinfo.nfts.length > 0)
                 _nextLink = _WNinfo.links.next;
         }
+        setNftCount(pageCount);
+    }
+
+    const getNftData = async (pageNumber_) => {
+        await getWalletNftData(pageNumber_);
+    }
+
+    const getWalletNftData = async (pageNumber_) => {
+        setLoadingView(true);
+
+        let _nextLink;
+        let _newWalletNftInfo = [];
+        let count = 1;
+
+        let _WNinfo = await getRequest(env.MIRROR_NET_URL + "/api/v1/accounts/" + accountIds[0] + "/nfts");
+        if (!_WNinfo) {
+            toast.error("Something wrong with network!");
+            setLoadingView(false);
+            return;
+        }
+
+        if (_WNinfo.nfts && _WNinfo.nfts.length > 0)
+            _nextLink = _WNinfo.links.next;
+
+        while (1) {
+            if (count == pageNumber_) {
+                let _tempNftInfo = _WNinfo.nfts;
+
+                for (let i = 0; i < _tempNftInfo.length; i++) {
+                    let _nftInfoResponse = await getNftInfoFromMirrorNet(_tempNftInfo[i].token_id, _tempNftInfo[i].serial_number);
+
+                    if (_nftInfoResponse.result) {
+                        _newWalletNftInfo.push({
+                            token_id: _tempNftInfo[i].token_id,
+                            serial_number: _tempNftInfo[i].serial_number,
+                            imageUrl: _nftInfoResponse.metaData.imageUrl,
+                            name: _nftInfoResponse.metaData.name,
+                            creator: _nftInfoResponse.metaData.creator,
+                        })
+                    }
+                }
+                break;
+            }
+            if (!_nextLink || _nextLink === null) break;
+
+            _WNinfo = await getRequest(env.MIRROR_NET_URL + _nextLink);
+            _nextLink = null;
+            count++;
+            if (_WNinfo.nfts && _WNinfo.nfts.length > 0)
+                _nextLink = _WNinfo.links.next;
+        }
+
         setUnlistedNfts(_newWalletNftInfo);
-        setAllNfts(_newWalletNftInfo.concat(nftList));
+        setAllNfts(_newWalletNftInfo.concat(listedNfts));
         setLoadingView(false);
     }
 
@@ -191,12 +235,50 @@ export default function Profile() {
         if (g_singleNftInfo && g_singleNftInfo.nfts.length > 0) {
             let g_preMdUrl = base64ToUtf8(g_singleNftInfo.nfts[0].metadata).split("//");
 
-            let _metadataUrl = env.IPFS_URL + g_preMdUrl[g_preMdUrl.length - 1];
+            let _metadataUrl = '';
+            let ipfsType = 0;
+            if (g_preMdUrl[g_preMdUrl.length - 2].includes('ipfs') == true) {
+                _metadataUrl = "https://ipfs.io/ipfs/" + g_preMdUrl[g_preMdUrl.length - 1];
+                ipfsType = 1;
+            }
+            else if (g_preMdUrl[g_preMdUrl.length - 2].includes('https') == true) {
+                if (g_preMdUrl[g_preMdUrl.length - 1].includes('ipfs.infura.io') == true) {
+                    let preMdUrlList = g_preMdUrl[g_preMdUrl.length - 1].split('/');
+                    _metadataUrl = "https://ipfs.io/ipfs/" + preMdUrlList[preMdUrlList?.length - 1];
+                    ipfsType = 2;
+                }
+                else if (g_preMdUrl[g_preMdUrl.length - 1].includes('cloudflare-ipfs.com') == true) { //issue
+                    return { result: false };
+                    // let preMdUrlList = g_preMdUrl[g_preMdUrl.length - 1].split('/');
+                    // _metadataUrl = "https://ipfs.io/ipfs/" + preMdUrlList[preMdUrlList?.length - 1];
+                    // ipfsType = 3;
+                }
+            }
+
             const _metadataInfo = await getRequest(_metadataUrl); // get NFT metadata
-            if (_metadataInfo && _metadataInfo.image != undefined) {
-                let _imageUrlList = _metadataInfo.image.split('/');
+            if (_metadataInfo && _metadataInfo.image != undefined && _metadataInfo.image?.type != "string") {
+                let _imageUrlList;
+                if (ipfsType == 1)
+                    _imageUrlList = _metadataInfo.image.split('://');
+                else if (ipfsType == 2)
+                    _imageUrlList = _metadataInfo.image.split('/');
+                else if (ipfsType == 3)
+                    _imageUrlList = _metadataInfo.image.description.split('ipfs/');
+
                 let _imageUrlLen = _imageUrlList?.length;
-                const _imageUrl = env.IPFS_URL + _imageUrlList[_imageUrlLen - 2] + "/" + _imageUrlList[_imageUrlLen - 1];
+                let _imageUrl = "";
+                if (ipfsType == 1) {
+                    if (_imageUrlLen == 2)
+                        _imageUrl = "https://ipfs.io/" + _imageUrlList[_imageUrlLen - 2] + "/" + _imageUrlList[_imageUrlLen - 1];
+                    else if (_imageUrlLen == 3)
+                        _imageUrl = "https://ipfs.io/" + _imageUrlList[_imageUrlLen - 3] + "/" + _imageUrlList[_imageUrlLen - 2] + "/" + _imageUrlList[_imageUrlLen - 1];
+                }
+                else if (ipfsType == 2) {
+                    _imageUrl = "https://ipfs.io/ipfs/" + _imageUrlList[_imageUrlLen - 1];
+                }
+                else if (ipfsType == 3) {
+                    _imageUrl = "https://ipfs.io/ipfs/" + _imageUrlList[_imageUrlLen - 1];
+                }
 
                 const _metaData = {
                     creator: _metadataInfo.creator,
@@ -424,7 +506,7 @@ export default function Profile() {
                                     </Box>
                                     <Box>
                                         {
-                                            unlistedNfts?.length > 0 &&
+                                            nftCount > 0 &&
                                             <div style={{
                                                 display: 'flex',
                                                 flexDirection: 'row',
@@ -445,11 +527,12 @@ export default function Profile() {
                                                         },
                                                     }}
                                                     page={nftPageIndex}
-                                                    onChange={(event, value) => {
-                                                        resetNftListToDisplay(value, unlistedNfts);
+                                                    onChange={async (event, value) => {
+                                                        setCurrentPageNftList(null);
                                                         setNftPageIndex(value);
+                                                        await getNftData(value);
                                                     }}
-                                                    count={parseInt(unlistedNfts.length / pagenationDisplayCount) + (unlistedNfts.length % pagenationDisplayCount !== 0 ? 1 : 0)}
+                                                    count={nftCount}
                                                     variant="outlined" />
                                             </div>
                                         }

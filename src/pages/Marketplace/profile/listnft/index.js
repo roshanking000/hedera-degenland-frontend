@@ -41,6 +41,9 @@ export default function ListNFT() {
     const { walletData, sendHbarAndNftToTreasury } = useHashConnect();
     const { accountIds } = walletData;
 
+    const [imageloadingState, setImageloadingState] = useState(false);
+    const [videoLoadingState, setVideoLoadingState] = useState(false);
+
     const [auctionDlgViewFlag, setAuctionDlgViewFlag] = useState(false);
     const [loadingView, setLoadingView] = useState(false);
     const [nftInfo, setNftInfo] = useState(null);
@@ -58,12 +61,11 @@ export default function ListNFT() {
         const getCollectionInfo = async (tokenId_) => {
             setLoadingView(true);
             const _collectionInfo = await getRequest(`${env.MIRROR_NET_URL}/api/v1/tokens/${tokenId_}`);
-            if (!_collectionInfo) { 
+            if (!_collectionInfo) {
                 toast.error("Something wrong with network!");
                 setLoadingView(false);
                 return;
             }
-            console.log(_collectionInfo);
             setCollectionName(_collectionInfo.name);
             setLoadingView(false);
             return;
@@ -75,13 +77,51 @@ export default function ListNFT() {
             if (g_singleNftInfo && g_singleNftInfo.nfts.length > 0) {
                 let g_preMdUrl = base64ToUtf8(g_singleNftInfo.nfts[0].metadata).split("//");
 
-                let _metadataUrl = env.IPFS_URL + g_preMdUrl[g_preMdUrl.length - 1];
+                let _metadataUrl = '';
+                let ipfsType = 0;
+                if (g_preMdUrl[g_preMdUrl.length - 2].includes('ipfs') == true) {
+                    _metadataUrl = "https://ipfs.io/ipfs/" + g_preMdUrl[g_preMdUrl.length - 1];
+                    ipfsType = 1;
+                }
+                else if (g_preMdUrl[g_preMdUrl.length - 2].includes('https') == true) {
+                    if (g_preMdUrl[g_preMdUrl.length - 1].includes('ipfs.infura.io') == true) {
+                        let preMdUrlList = g_preMdUrl[g_preMdUrl.length - 1].split('/');
+                        _metadataUrl = "https://ipfs.io/ipfs/" + preMdUrlList[preMdUrlList?.length - 1];
+                        ipfsType = 2;
+                    }
+                    else if (g_preMdUrl[g_preMdUrl.length - 1].includes('cloudflare-ipfs.com') == true) { //issue
+                        return { result: false };
+                        // let preMdUrlList = g_preMdUrl[g_preMdUrl.length - 1].split('/');
+                        // _metadataUrl = "https://ipfs.io/ipfs/" + preMdUrlList[preMdUrlList?.length - 1];
+                        // ipfsType = 3;
+                    }
+                }
+    
                 const _metadataInfo = await getRequest(_metadataUrl); // get NFT metadata
-                if (_metadataInfo && _metadataInfo.image != undefined) {
-                    let _imageUrlList = _metadataInfo.image.split('/');
+                if (_metadataInfo && _metadataInfo.image != undefined && _metadataInfo.image?.type != "string") {
+                    let _imageUrlList;
+                    if (ipfsType == 1)
+                        _imageUrlList = _metadataInfo.image.split('://');
+                    else if (ipfsType == 2)
+                        _imageUrlList = _metadataInfo.image.split('/');
+                    else if (ipfsType == 3)
+                        _imageUrlList = _metadataInfo.image.description.split('ipfs/');
+    
                     let _imageUrlLen = _imageUrlList?.length;
-                    const _imageUrl = env.IPFS_URL + _imageUrlList[_imageUrlLen - 2] + "/" + _imageUrlList[_imageUrlLen - 1];
-
+                    let _imageUrl = "";
+                    if (ipfsType == 1) {
+                        if (_imageUrlLen == 2)
+                            _imageUrl = "https://ipfs.io/" + _imageUrlList[_imageUrlLen - 2] + "/" + _imageUrlList[_imageUrlLen - 1];
+                        else if (_imageUrlLen == 3)
+                            _imageUrl = "https://ipfs.io/" + _imageUrlList[_imageUrlLen - 3] + "/" + _imageUrlList[_imageUrlLen - 2] + "/" + _imageUrlList[_imageUrlLen - 1];
+                    }
+                    else if (ipfsType == 2) {
+                        _imageUrl = "https://ipfs.io/ipfs/" + _imageUrlList[_imageUrlLen - 1];
+                    }
+                    else if (ipfsType == 3) {
+                        _imageUrl = "https://ipfs.io/ipfs/" + _imageUrlList[_imageUrlLen - 1];
+                    }
+    
                     const _metaData = {
                         token_id: tokenId_,
                         serial_number: serialNum_,
@@ -276,10 +316,15 @@ export default function ListNFT() {
                                         }} autoPlay loop>
                                             <source src={nftInfo.imageUrl} />
                                         </video>
-                                        <img alt='' src={nftInfo.imageUrl} style={{
-                                            borderRadius: '0.375rem',
-                                            maxWidth: '564px',
-                                        }} />
+                                        <img alt='' src={imageloadingState ? nftInfo.imageUrl : process.env.PUBLIC_URL + "/imgs/loading.gif"}
+                                            onLoad={() => {
+                                                setImageloadingState(true);
+                                            }}
+                                            style={{
+                                                borderRadius: '0.375rem',
+                                                maxWidth: '564px',
+                                            }}
+                                        />
                                     </Box>
                                 </Grid>
                                 <Grid item xs={6}>
@@ -584,106 +629,109 @@ export default function ListNFT() {
                                             </div>
                                         </Box>
                                         {/* About Attributes */}
-                                        <Box>
-                                            <button style={{
-                                                display: 'flex',
-                                                height: '46px',
-                                                position: 'relative',
-                                                textAlign: 'left',
-                                                paddingTop: '0.5rem',
-                                                paddingBottom: '0.5rem',
-                                                borderWidth: '1px',
-                                                borderRadius: '0.5rem',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                width: '100%',
-                                                padding: '0',
-                                                lineHeight: 'inherit',
-                                                color: 'inherit',
-                                                backgroundColor: 'transparent',
-                                                backgroundImage: 'none',
-                                                fontFamily: 'inherit',
-                                                fontSize: '100%',
-                                                margin: '0'
-                                            }}>
-                                                <div style={{
+                                        {
+                                            nftInfo.attributes &&
+                                            <Box>
+                                                <button style={{
                                                     display: 'flex',
-                                                    paddingLeft: '1rem',
-                                                    justifyContent: 'center',
-                                                    alignItems: 'center'
-                                                }}>
-                                                    <EventNoteOutlined sx={{
-                                                        display: 'block',
-                                                        color: 'blue',
-                                                        verticalAlign: 'middle',
-                                                        width: '1.75rem',
-                                                        height: '1.75rem',
-                                                        marginRight: '0.5rem'
-                                                    }} />
-                                                    <span style={{
-                                                        fontWeight: '700',
-                                                        verticalAlign: 'middle'
-                                                    }}>
-                                                        Attributes
-                                                    </span>
-                                                </div>
-                                                <span style={{
-                                                    display: 'flex',
+                                                    height: '46px',
+                                                    position: 'relative',
+                                                    textAlign: 'left',
+                                                    paddingTop: '0.5rem',
+                                                    paddingBottom: '0.5rem',
+                                                    borderWidth: '1px',
+                                                    borderRadius: '0.5rem',
+                                                    justifyContent: 'space-between',
                                                     alignItems: 'center',
-                                                    marginLeft: '1.5rem',
-                                                    marginRight: '0.5rem'
+                                                    width: '100%',
+                                                    padding: '0',
+                                                    lineHeight: 'inherit',
+                                                    color: 'inherit',
+                                                    backgroundColor: 'transparent',
+                                                    backgroundImage: 'none',
+                                                    fontFamily: 'inherit',
+                                                    fontSize: '100%',
+                                                    margin: '0'
                                                 }}>
-                                                    {/* <Add sx={{
+                                                    <div style={{
+                                                        display: 'flex',
+                                                        paddingLeft: '1rem',
+                                                        justifyContent: 'center',
+                                                        alignItems: 'center'
+                                                    }}>
+                                                        <EventNoteOutlined sx={{
+                                                            display: 'block',
+                                                            color: 'blue',
+                                                            verticalAlign: 'middle',
+                                                            width: '1.75rem',
+                                                            height: '1.75rem',
+                                                            marginRight: '0.5rem'
+                                                        }} />
+                                                        <span style={{
+                                                            fontWeight: '700',
+                                                            verticalAlign: 'middle'
+                                                        }}>
+                                                            Attributes
+                                                        </span>
+                                                    </div>
+                                                    <span style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        marginLeft: '1.5rem',
+                                                        marginRight: '0.5rem'
+                                                    }}>
+                                                        {/* <Add sx={{
                                                         display: 'block',
                                                         width: '1.75rem',
                                                         height: '1.75rem',
                                                         verticalAlign: 'middle',
                                                         color: 'gray'
                                                     }} /> */}
-                                                </span>
-                                            </button>
-                                            <div style={{
-                                                display: 'grid',
-                                                gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
-                                                paddingTop: '0.25rem',
-                                                paddingBottom: '0.25rem',
-                                                paddingLeft: '0.5rem',
-                                                paddingRight: '0.5rem',
-                                                backgroundColor: 'darksalmon',
-                                                borderWidth: '1px',
-                                                borderRadius: '0.5rem',
-                                                marginTop: '0.5rem',
-                                                marginBottom: '0.5rem'
-                                            }}>
-                                                {
-                                                    nftInfo.attributes.map((item, index) => {
-                                                        return <div key={index} style={{
-                                                            padding: '0.75rem',
-                                                            backgroundColor: 'black',
-                                                            borderRadius: '0.5rem',
-                                                            margin: '0.25rem'
-                                                        }}>
-                                                            <div style={{
-                                                                lineHeight: '1rem',
-                                                                marginBottom: '0.25rem',
-                                                                color: 'darkgray'
+                                                    </span>
+                                                </button>
+                                                <div style={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
+                                                    paddingTop: '0.25rem',
+                                                    paddingBottom: '0.25rem',
+                                                    paddingLeft: '0.5rem',
+                                                    paddingRight: '0.5rem',
+                                                    backgroundColor: 'darksalmon',
+                                                    borderWidth: '1px',
+                                                    borderRadius: '0.5rem',
+                                                    marginTop: '0.5rem',
+                                                    marginBottom: '0.5rem'
+                                                }}>
+                                                    {
+                                                        nftInfo.attributes.map((item, index) => {
+                                                            return <div key={index} style={{
+                                                                padding: '0.75rem',
+                                                                backgroundColor: 'black',
+                                                                borderRadius: '0.5rem',
+                                                                margin: '0.25rem'
                                                             }}>
-                                                                {item.trait_type}
+                                                                <div style={{
+                                                                    lineHeight: '1rem',
+                                                                    marginBottom: '0.25rem',
+                                                                    color: 'darkgray'
+                                                                }}>
+                                                                    {item.trait_type}
+                                                                </div>
+                                                                <div style={{
+                                                                    display: 'flex',
+                                                                    flexWrap: 'wrap',
+                                                                    rowGap: '0.25rem',
+                                                                    columnGap: '1rem',
+                                                                    color: 'whitesmoke'
+                                                                }}>
+                                                                    {item.value}
+                                                                </div>
                                                             </div>
-                                                            <div style={{
-                                                                display: 'flex',
-                                                                flexWrap: 'wrap',
-                                                                rowGap: '0.25rem',
-                                                                columnGap: '1rem',
-                                                                color: 'whitesmoke'
-                                                            }}>
-                                                                {item.value}
-                                                            </div>
-                                                        </div>
-                                                    })
-                                                }
-                                            </div>
-                                        </Box>
+                                                        })
+                                                    }
+                                                </div>
+                                            </Box>
+                                        }
                                         {/* About Details */}
                                         <Box>
                                             <button style={{
@@ -909,7 +957,7 @@ export default function ListNFT() {
                     }}>
                         <Button onClick={() => {
                             setAuctionDlgViewFlag(false);
-//                            onClickAuction();
+                            //                            onClickAuction();
                         }}
                             sx={{
                                 height: '42px',

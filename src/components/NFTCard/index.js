@@ -1,5 +1,9 @@
-import React from 'react';
-import Box from '@mui/material/Box';
+import React, { useState } from 'react';
+
+import {
+    CircularProgress,
+    Box,
+} from '@mui/material';
 
 import {
     FavoriteBorderOutlined,
@@ -10,6 +14,8 @@ function NFTCard({
     nftInfo,
     onClickNFTCard
 }) {
+    const [imageloadingState, setImageloadingState] = useState(false);
+    const [videoLoadingState, setVideoLoadingState] = useState(false);
     return (
         <>
             <Box sx={{
@@ -27,21 +33,27 @@ function NFTCard({
                         opacity: '0.75',
                     }
                 }}>
-                    <video style={{
-                        position: 'absolute',
-                        borderRadius: '0.375rem',
-                        width: '244px',
-                        height: '244px'
-                    }} autoPlay loop>
+                    <video
+                        style={{
+                            position: 'absolute',
+                            borderRadius: '0.375rem',
+                            width: '244px',
+                            height: '244px'
+                        }} autoPlay loop>
                         <source src={nftInfo.imageUrl} />
                     </video>
-                    <img alt='' loading='lazy' src={nftInfo.imageUrl} style={{
-                        width: '244px',
-                        borderRadius: '0.375rem',
-                        height: '244px',
-                        top: 0,
-                        left: 0,
-                    }} />
+                    <img alt='' src={imageloadingState ? nftInfo.imageUrl : process.env.PUBLIC_URL + "/imgs/loading.gif"}
+                        onLoad={() => {
+                            setImageloadingState(true);
+                        }}
+                        style={{
+                            width: '244px',
+                            borderRadius: '0.375rem',
+                            height: '244px',
+                            top: 0,
+                            left: 0,
+                        }}
+                    />
                 </Box>
                 <div style={{
                     display: 'flex',
@@ -64,7 +76,7 @@ function NFTCard({
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden'
-                        }}>{nftInfo.name}</p>
+                        }}>{nftInfo.name ? nftInfo.name : 'undefined'}</p>
                         <p style={{
                             margin: 0,
                             color: 'blue',
@@ -76,7 +88,7 @@ function NFTCard({
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden'
-                        }}>{nftInfo.creator}</p>
+                        }}>{nftInfo.creator ? nftInfo.creator : 'undefined'}</p>
                     </div>
                 </div>
                 {
