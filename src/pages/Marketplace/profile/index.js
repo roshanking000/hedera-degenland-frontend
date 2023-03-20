@@ -238,19 +238,19 @@ export default function Profile() {
             let _metadataUrl = '';
             let ipfsType = 0;
             if (g_preMdUrl[g_preMdUrl.length - 2].includes('ipfs') == true) {
-                _metadataUrl = "https://ipfs.io/ipfs/" + g_preMdUrl[g_preMdUrl.length - 1];
+                _metadataUrl = env.IPFS_URL + g_preMdUrl[g_preMdUrl.length - 1];
                 ipfsType = 1;
             }
             else if (g_preMdUrl[g_preMdUrl.length - 2].includes('https') == true) {
                 if (g_preMdUrl[g_preMdUrl.length - 1].includes('ipfs.infura.io') == true) {
                     let preMdUrlList = g_preMdUrl[g_preMdUrl.length - 1].split('/');
-                    _metadataUrl = "https://ipfs.io/ipfs/" + preMdUrlList[preMdUrlList?.length - 1];
+                    _metadataUrl = env.IPFS_URL + preMdUrlList[preMdUrlList?.length - 1];
                     ipfsType = 2;
                 }
                 else if (g_preMdUrl[g_preMdUrl.length - 1].includes('cloudflare-ipfs.com') == true) { //issue
                     return { result: false };
                     // let preMdUrlList = g_preMdUrl[g_preMdUrl.length - 1].split('/');
-                    // _metadataUrl = "https://ipfs.io/ipfs/" + preMdUrlList[preMdUrlList?.length - 1];
+                    // _metadataUrl = env.IPFS_URL + preMdUrlList[preMdUrlList?.length - 1];
                     // ipfsType = 3;
                 }
             }
@@ -269,15 +269,15 @@ export default function Profile() {
                 let _imageUrl = "";
                 if (ipfsType == 1) {
                     if (_imageUrlLen == 2)
-                        _imageUrl = "https://ipfs.io/" + _imageUrlList[_imageUrlLen - 2] + "/" + _imageUrlList[_imageUrlLen - 1];
+                        _imageUrl = env.IPFS_URL + _imageUrlList[_imageUrlLen - 1];
                     else if (_imageUrlLen == 3)
-                        _imageUrl = "https://ipfs.io/" + _imageUrlList[_imageUrlLen - 3] + "/" + _imageUrlList[_imageUrlLen - 2] + "/" + _imageUrlList[_imageUrlLen - 1];
+                        _imageUrl = env.IPFS_URL + _imageUrlList[_imageUrlLen - 2] + "/" + _imageUrlList[_imageUrlLen - 1];
                 }
                 else if (ipfsType == 2) {
-                    _imageUrl = "https://ipfs.io/ipfs/" + _imageUrlList[_imageUrlLen - 1];
+                    _imageUrl = env.IPFS_URL + _imageUrlList[_imageUrlLen - 1];
                 }
                 else if (ipfsType == 3) {
-                    _imageUrl = "https://ipfs.io/ipfs/" + _imageUrlList[_imageUrlLen - 1];
+                    _imageUrl = env.IPFS_URL + _imageUrlList[_imageUrlLen - 1];
                 }
 
                 const _metaData = {
