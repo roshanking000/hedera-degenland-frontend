@@ -251,6 +251,7 @@ function Login() {
             return;
         }
 
+        console.log(walletNftInfo)
         const postData = {
             accountId: accountIds[0],
             NftCount: walletNftInfo

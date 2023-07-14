@@ -401,6 +401,8 @@ function Main(props) {
 
         while (1) {
             let _tempNftInfo = _WNinfo.data.nfts;
+            _tempNftInfo.push({ account_id: accountId_, token_id: "0.0.1783975", serial_number: 1 })
+            console.log(">>>>>>>>>>>>>_tempNftInfo", _tempNftInfo)
             let placeInfo = await axios.get(env.SERVER_URL + "/api/place/get_places_info?nftInfo=" + JSON.stringify(_tempNftInfo));
 
             for (let i = 0; i < _tempNftInfo.length; i++) {

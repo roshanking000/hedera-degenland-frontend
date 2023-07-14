@@ -1,0 +1,12 @@
+{
+  "name": "degenland-frontend-react-phaser-hedera",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@mui/icons-material": "^5.10.6",
+    "@mui/joy": "^5.0.0-alpha.47",
+    "@mui/lab": "^5.0.0-alpha.95",
+    "@mui/material": "latest",
+    "mui-image": "^1.0.7"
+  }
+}
