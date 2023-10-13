@@ -17,8 +17,8 @@ export const COINGECKO_URL = "https://api.coingecko.com";
 // export const SERVER_URL = "http://localhost:5000";
 // export const IMG_URL = "http://localhost:5000/images";
 
-export const SERVER_URL = "https://api.brunoailabs.art";
-export const IMG_URL = "https://api.brunoailabs.art/images";
+export const SERVER_URL = "degenland.cryptosnowprince.com";
+export const IMG_URL = "degenland.cryptosnowprince.com/images";
 
 export const DEGENLAND_NFT_ID = "0.0.1783975";
 export const TYCOON_NFT_ID = "0.0.1467455";
